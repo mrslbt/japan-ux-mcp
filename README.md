@@ -2,9 +2,9 @@
 
 Japanese UX conventions as an MCP server. Works with Claude Code, Cursor, Windsurf, VS Code (Copilot), Claude Desktop, Cline, Zed, and any other MCP-compatible client.
 
-Your AI stops generating Western-default forms and starts producing correct Japanese UI: proper name order, furigana, 3-field phone numbers, postal code auto-fill, keigo at the right politeness level.
+Your AI stops generating Western-default patterns and starts producing correct Japanese UI: proper name order, furigana, 3-field phone numbers, postal code auto-fill, keigo at the right politeness level, Japanese typography rules, seasonal design context, trust signals, and legal compliance.
 
-`6 tools` · `6 prompts` · `4 resources` · `no API keys`
+`9 tools` · `9 prompts` · `9 resources` · `15 data files` · `no API keys`
 
 ---
 
@@ -17,7 +17,9 @@ AI generates Western UX by default. If you're building for Japan, you know what 
 - `MM/DD/YYYY` instead of `年月日` with era support
 - Flat address fields instead of the `〒` postal code cascade
 - Blunt error messages where keigo is expected
-- "John Smith" as placeholder text
+- Arial at 1.5 line-height instead of Noto Sans JP at 1.8+
+- No 特定商取引法 page, no phone number in the header, no 会社概要
+- Zero seasonal awareness (launching during Golden Week, Christmas treated as family holiday)
 
 You can correct it every single time, or install this once.
 
@@ -196,6 +198,9 @@ These get called automatically when the AI recognizes a Japanese UX context. You
 | `suggest_keigo_level` | Takes English UI text, returns Japanese at the right politeness level for the business context |
 | `score_japan_readiness` | Rates a page across 5 categories: forms, copy, trust signals, typography, cultural fit |
 | `transform_for_japan` | Rewrites Western markup as Japan-ready. Shows before/after score, explains each change |
+| `check_jp_typography` | Audits CSS for Japanese typography: font stacks, line-height, kinsoku shori, font sizing, palt |
+| `get_seasonal_context` | Returns current season, active events, 24 microseasons (二十四節気), launch blackout warnings |
+| `audit_japan_ux` | Full 7-category audit: layout, typography, visual, navigation, trust, content, mobile. Letter grade A-F |
 
 ---
 
@@ -211,6 +216,9 @@ Prompt templates you can call from any MCP client that supports them.
 | `japan_testdata` | Generate Japanese test data for prototypes |
 | `japan_keigo` | Get the right politeness level for UI text |
 | `japan_score` | Score a page description for Japan-readiness |
+| `japan_typography` | Check CSS for Japanese typography issues |
+| `japan_seasonal` | Get seasonal design context for a specific month |
+| `japan_full_audit` | Run a comprehensive 7-category Japanese UX audit |
 
 ---
 
@@ -224,6 +232,11 @@ Reference data your AI can access during a session.
 | `form-checklist` | Japanese form conventions checklist for pre-ship review |
 | `phone-formats` | Mobile, landline, toll-free, IP phone patterns with field-splitting rules |
 | `era-calendar` | 令和 through 明治 with date ranges and conversion formulas |
+| `typography-guide` | Font stacks, type scale, line-height rules, kinsoku shori, CSS suggestions |
+| `seasonal-calendar` | 24 events, 24 microseasons, seasonal color palettes, launch blackout dates |
+| `trust-checklist` | Trust signals, legal pages, social proof requirements by site type |
+| `color-guide` | Japanese color meanings, the red-name taboo, visual design rules |
+| `layout-guide` | Grid, spacing, density conventions, responsive breakpoints, structural patterns |
 
 ---
 
@@ -292,17 +305,35 @@ I need Japanese UI copy for a banking app:
 - Confirmation: "Are you sure you want to delete?"
 ```
 
+### Check typography
+```
+Check this CSS for Japanese typography issues:
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  font-style: italic;
+}
+```
+
+### Get seasonal context
+```
+I'm designing a campaign landing page. What's the current Japanese seasonal context?
+What colors, motifs, and events should I consider? Any launch blackout dates coming up?
+```
+
+### Run a full UX audit
+```
+Run a Japanese UX audit on this B2B SaaS landing page.
+It has: hero with English tagline, feature grid, pricing table,
+no phone number in header, no company info page, single-column layout.
+```
+
 ### Generate test data
 ```
 Generate 10 Japanese user profiles for a prototype.
 Mixed gender, ages 25-45. Include full address and company.
-```
-
-### Score a page
-```
-Score this checkout page for Japan-readiness:
-Single name field, email, one phone field, US-style address,
-"Buy Now" button, no company info in footer, no privacy policy.
 ```
 
 ### Get design direction
@@ -326,12 +357,25 @@ Everything runs locally. No external APIs, no keys, no network calls.
 | Eras | 5 | 令和 through 明治 with start/end dates |
 | Keigo patterns | 30 | UI strings at 4 politeness levels across 9 element types |
 | Width rules | 6 | Full-width/half-width validation per field type |
-| Conversion utils | 4 | ０１２→012, ＠→@, Gregorian→era, era→Gregorian |
+| Layout rules | 28 | Grid, spacing, density, responsive, structural patterns |
+| Typography rules | 24 | Font stacks, sizing, line-height, wrapping, rendering |
+| Font stacks | 7 | System, web, serif, mixed modern/elegant/rounded/corporate |
+| Visual rules | 21 | Color meanings, imagery, icons, shadows, corners |
+| Navigation rules | 16 | Header, footer, menu, search, breadcrumb, pagination |
+| Trust signals | 20 | Company info, social proof, certifications, contact |
+| Legal requirements | 10 | 特定商取引法, APPI, 景品表示法, 薬機法, and more |
+| Seasonal events | 24 | Full year with design impact and business notes |
+| Microseasons | 24 | 二十四節気 with approximate dates |
+| Color meanings | 9 | Japanese-specific color associations with hex values |
+| Platform patterns | 30+ | LINE, QR codes, mobile payments, IME handling, social sharing |
+| Accessibility rules | 20+ | JIS X 8341-3, aging population, screen readers, furigana |
+| Content patterns | 15+ | Density, copy, product pages, localization rules |
 
 ---
 
-## Japanese conventions covered
+## Conventions covered
 
+### Forms and input
 | Convention | What it means in practice |
 |-----------|--------------------------|
 | Name order | Family name (姓) first, given name (名) second |
@@ -339,11 +383,56 @@ Everything runs locally. No external APIs, no keys, no network calls.
 | Phone | 3 separate fields. Pattern: XXX-XXXX-XXXX |
 | Address | 〒 postal code auto-fills prefecture + city. Large to small order |
 | Dates | Separate 年/月/日 inputs with optional era display (令和6年 = 2024) |
-| Keigo | 4 politeness levels mapped to 8 business contexts |
 | Character width | Auto-convert full-width digits and symbols to half-width on input |
-| Trust signals | 特定商取引法 disclosure page, company info, phone number in header |
-| Field labels | 必須 (required, red badge) and 任意 (optional) |
 | Confirmation | 確認画面 review screen before final submission |
+
+### Typography
+| Convention | What it means in practice |
+|-----------|--------------------------|
+| No italics | Japanese has no italic form. Use bold, color, or size for emphasis |
+| Line-height 1.8+ | Kanji density requires more vertical space than Latin text |
+| 16px body minimum | Kanji readability breaks below 14px |
+| Kinsoku shori | word-break: keep-all. Never start a line with punctuation |
+| Font stacks | Hiragino Sans, Yu Gothic, Meiryo cascade. Noto Sans JP for web fonts |
+| Mixed EN/JP | English font first, Japanese fallback: "Inter", "Noto Sans JP", sans-serif |
+
+### Layout and structure
+| Convention | What it means in practice |
+|-----------|--------------------------|
+| Information density | Dense layouts are trusted. Sparse feels like hiding information |
+| 1280px PC / 375px mobile | Standard Japanese artboard sizes with 140-160px side margins |
+| Section spacing | 100px between major sections (PC), 60px on mobile |
+| Alternating zigzag | Image-left/text-right, then reverse. Standard on Japanese LPs |
+| Breadcrumbs | Required on all interior pages |
+| Repeat CTAs | Place conversion buttons at multiple scroll points |
+
+### Trust and legal
+| Convention | What it means in practice |
+|-----------|--------------------------|
+| 特定商取引法 | Required legal disclosure for all ecommerce. Seller info, returns, payment |
+| 会社概要 | Company profile page with address, CEO name, capital, founding year |
+| Phone in header | Visible phone number signals legitimacy. 0120 toll-free preferred |
+| Privacy policy | 個人情報保護方針 required by APPI (amended April 2022) |
+| Proof numbers | Specific metrics near hero: 1,247社導入, 業務効率30%改善 |
+| Keigo | 4 politeness levels mapped to 8 business contexts |
+
+### Visual and color
+| Convention | What it means in practice |
+|-----------|--------------------------|
+| Red = prosperity | Not danger. Used freely as primary brand color |
+| No red names | Writing names in red = death association. Always use dark text |
+| Black + white = funeral | Add an accent color to break the association |
+| Bright palettes | Dense, colorful layouts are normal. Dark theme lags behind the West |
+| Manga/anime illustration | Used across all industries, including banks and government |
+
+### Seasonal
+| Convention | What it means in practice |
+|-----------|--------------------------|
+| 4 seasons, 24 microseasons | Each has distinct color palettes and design motifs |
+| Golden Week (Apr 29-May 5) | Do not launch products. Most businesses closed |
+| Obon (Aug 13-16) | Businesses closed, travel peak. Avoid launches |
+| Christmas is romantic | Couples celebrate, not families. Families gather at New Year |
+| お中元 / お歳暮 | Mid-year and year-end gift seasons. Major ecommerce events |
 
 ---
 
@@ -353,7 +442,7 @@ Developers outside Japan who are building Japanese-facing products and are tired
 
 Japanese companies whose AI tools keep defaulting to Western patterns even though the product is entirely in Japanese.
 
-Localization teams. Translation gets you maybe 30% of the way. The other 70% is structural: field order, phone splitting, postal cascades, keigo levels. That's what this covers.
+Localization teams. Translation gets you maybe 30% of the way. The other 70% is structural: field order, phone splitting, postal cascades, keigo levels, trust signals, legal pages, seasonal awareness. That's what this covers.
 
 Designers who build with AI and want Japanese patterns available from the start without explaining them every session.
 
@@ -378,26 +467,20 @@ Designers who build with AI and want Japanese patterns available from the start 
 
 - [x] 6 core tools: forms, validation, placeholders, keigo, scoring, transformation
 - [x] MCP prompts and resources
-- [ ] Seasonal context and cultural audit
-- [ ] Typography checker for JP/EN mixed text
+- [x] Seasonal context tool with 24 events, 24 microseasons, launch blackout warnings
+- [x] Typography checker for JP/EN mixed text
+- [x] Full 7-category UX audit tool (layout, typography, visual, navigation, trust, content, mobile)
+- [x] Trust signals and legal requirements data (特定商取引法, APPI, 景品表示法, 薬機法)
+- [x] Visual rules (color meanings, red-name taboo, halation)
+- [x] Layout patterns (grid, spacing, density, responsive breakpoints)
+- [x] Navigation patterns (headers, footers, menus, breadcrumbs)
+- [x] Platform integration data (LINE, QR, payments, IME, social sharing)
+- [x] JIS X 8341-3 accessibility rules
+- [x] Content patterns (density, copy, product pages)
+- [ ] Address formatter with postal code API
 - [ ] Reference site database by business vertical
 - [ ] Design direction matrix
-- [ ] Address formatter with postal code API
-- [ ] JIS X 8341 accessibility checks
 - [ ] Community-contributed patterns
-
----
-
-## Docs
-
-| File | What's in it |
-|------|-------------|
-| [TOOLS.md](TOOLS.md) | Input/output specs with examples for every tool |
-| [PROMPTS.md](PROMPTS.md) | 10 workflow templates and an interview demo script |
-| [DATA.md](DATA.md) | All bundled data: prefectures, names, phones, eras, keigo |
-| [COMPETITORS.md](COMPETITORS.md) | Competitive landscape and how this fits in |
-| [PRD.md](PRD.md) | Product requirements and design decisions |
-| [ROADMAP.md](ROADMAP.md) | Phased build plan |
 
 ---
 
