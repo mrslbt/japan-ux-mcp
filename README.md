@@ -479,9 +479,9 @@ Everything runs locally. No external APIs, no keys, no network calls.
 
 ## Who uses this
 
-Developers outside Japan who are building Japanese-facing products and are tired of manually correcting every form, label, and error message.
-
 Japanese companies whose AI tools keep defaulting to Western patterns even though the product is entirely in Japanese.
+
+Developers outside Japan who are building Japanese-facing products and are tired of manually correcting every form, label, and error message.
 
 Localization teams. Translation gets you maybe 30% of the way. The other 70% is structural: field order, phone splitting, postal cascades, keigo levels, trust signals, legal pages, seasonal awareness. That's what this covers.
 
@@ -507,6 +507,14 @@ Designers who build with AI and want Japanese patterns available from the start 
 ## License
 
 [MIT](LICENSE)
+
+---
+
+## 日本語
+
+日本のUX慣習をAIツールに組み込むMCPサーバーです。姓名順、フリガナ、3分割電話番号、〒住所フロー、敬語レベル、特定商取引法、季節デザインなど、AIが見落としがちな日本固有のパターンをカバーしています。
+
+Claude Code、Cursor、Windsurf など MCP 対応のAIツールで動作します。APIキー不要。
 
 ---
 
