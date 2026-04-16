@@ -114,6 +114,7 @@ const EVENTS: EventInfo[] = [
   { id: "mothers_day", name_ja: "母の日", name_en: "Mother's Day", date: "2nd Sunday May", month: 5, design_impact: "Carnations (red and pink). Gift-focused, warm color palettes.", business_notes: "Major gift ecommerce event. Flower delivery services peak." },
   { id: "fathers_day", name_ja: "父の日", name_en: "Father's Day", date: "3rd Sunday June", month: 6, design_impact: "Yellow roses (Japan-specific). Blue and yellow palettes.", business_notes: "Smaller than Mother's Day but growing. Gift campaigns." },
   { id: "rainy_season", name_ja: "梅雨", name_en: "Rainy season (Tsuyu)", date: "June - July", month: 6, design_impact: "Rain, hydrangeas (紫陽花), umbrellas, frogs. Blue-purple-green palettes. Subdued but not gloomy.", business_notes: "Affects outdoor campaign imagery. Indoor activity promotions. Humidity-related product campaigns (dehumidifiers, anti-mold). Avoid outdoor event promotions." },
+  { id: "tanabata", name_ja: "七夕", name_en: "Tanabata (Star Festival)", date: "Jul 7", month: 7, design_impact: "Bamboo branches, tanzaku wish tags, stars, Milky Way imagery. Blue, purple, and silver color accents.", business_notes: "Wish-making campaigns. Retail promotions around short-lived decorations. Growing commercial event, especially for shopping centers." },
   { id: "ochugen", name_ja: "お中元", name_en: "Mid-year gifts", date: "July", month: 7, design_impact: "Formal gift packaging. Summer blue and white. Noshi (熨斗) wrapping patterns.", business_notes: "Major ecommerce event. Corporate gift-giving season. Gift catalog sites peak. Delivery scheduling is critical." },
   { id: "marine_day", name_ja: "海の日", name_en: "Marine Day", date: "3rd Monday July", month: 7, design_impact: "Ocean, beach, summer blue imagery.", business_notes: "Start of summer vacation period. Beach and travel promotions." },
   { id: "obon", name_ja: "お盆", name_en: "Obon", date: "Aug 13-16", month: 8, design_impact: "Lanterns, bon odori (dance). Subdued, respectful. Not funeral-somber but ancestral remembrance.", business_notes: "Many businesses closed Aug 13-16. Peak domestic travel. Do not schedule launches. Customer support may be limited. Second biggest holiday after New Year." },
@@ -252,7 +253,7 @@ export function getSeasonalContext(params: SeasonalContextParams): SeasonalConte
   }
 
   // Avoid warnings
-  const gwActive = month === 5 && day <= 5 || (month === 4 && day >= 29);
+  const gwActive = (month === 5 && day <= 5) || (month === 4 && day >= 29);
   if (gwActive) {
     avoid.push("DO NOT launch products during Golden Week (Apr 29 - May 5). Most businesses are closed.");
   }

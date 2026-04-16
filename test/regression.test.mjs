@@ -6,6 +6,10 @@ import { scoreJapanReadiness } from "../dist/tools/score-japan-readiness.js";
 import { transformForJapan } from "../dist/tools/transform-for-japan.js";
 import { generateJpForm } from "../dist/tools/generate-jp-form.js";
 import { designDirectionForJapan } from "../dist/tools/design-direction-for-japan.js";
+import { checkJpTypography } from "../dist/tools/check-jp-typography.js";
+import { auditJapanUx } from "../dist/tools/audit-japan-ux.js";
+import { getSeasonalContext } from "../dist/tools/get-seasonal-context.js";
+import { fullwidthAsciiToHalfwidth } from "../dist/data/fullwidth-halfwidth.js";
 
 test("unknown keigo text does not fall back to an unrelated canned phrase", () => {
   const buttonResult = suggestKeigoLevel({
@@ -98,4 +102,55 @@ test("design direction infers Japan-specific guidance from loose brand, audience
   assert.ok(result.cta_style.labels.includes("ご予約"));
   assert.ok(result.trust_layout.hero.length > 0);
   assert.ok(result.section_priorities.some((section) => section.section.includes("アクセス")));
+});
+
+test("tone override shifts keigo level instead of ignoring it", () => {
+  const friendlier = suggestKeigoLevel({
+    text: "Invalid email address",
+    ui_element: "error_message",
+    context: "corporate",
+    tone: "friendly",
+  });
+  const moreFormal = suggestKeigoLevel({
+    text: "Invalid email address",
+    ui_element: "error_message",
+    context: "consumer_app",
+    tone: "formal",
+  });
+
+  assert.match(friendlier.level, /^neutral /);
+  assert.equal(friendlier.suggested, "メールアドレスが正しくありません");
+  assert.match(moreFormal.level, /^formal /);
+  assert.equal(moreFormal.suggested, "メールアドレスの形式が正しくありません。正しいメールアドレスをご入力ください。");
+});
+
+test("fullwidth ascii conversion preserves katakana long vowel marks", () => {
+  assert.equal(fullwidthAsciiToHalfwidth("ＡＢＣ－１２３ー"), "ABC-123ー");
+});
+
+test("typography audit does not claim font-size compliance when no font sizes exist", () => {
+  const result = checkJpTypography({
+    css: 'body { font-family: "Noto Sans JP", sans-serif; line-height: 1.8; word-break: keep-all; overflow-wrap: break-word; font-feature-settings: "palt"; }',
+    context: "corporate",
+  });
+
+  assert.ok(!result.passed.includes("Font sizes meet kanji readability minimum"));
+});
+
+test("mobile audit flags touch targets when either dimension is below 44px", () => {
+  const result = auditJapanUx({
+    markup: `
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <button style="width:30px;height:50px">Menu</button>
+    `,
+    site_type: "lp",
+  });
+
+  assert.ok(result.categories.mobile.issues.some((issue) => issue.rule_id === "mobile_touch_targets"));
+});
+
+test("seasonal context includes Tanabata in July active events", () => {
+  const result = getSeasonalContext({ month: 7, day: 7 });
+
+  assert.ok(result.active_events.some((event) => event.id === "tanabata"));
 });

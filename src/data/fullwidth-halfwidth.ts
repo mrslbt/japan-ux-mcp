@@ -58,7 +58,7 @@ export function fullwidthAsciiToHalfwidth(str: string): string {
     .replace(/＠/g, "@")
     .replace(/．/g, ".")
     .replace(/＿/g, "_")
-    .replace(/ー/g, "-");
+    .replace(/－/g, "-");
 }
 
 /**
