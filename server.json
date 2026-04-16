@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.mrslbt/japan-ux",
+  "description": "MCP for building Japan-native websites with AI. 10 tools covering forms, keigo, typography, layout, trust signals, legal compliance, seasonal design, and accessibility.",
+  "repository": {
+    "url": "https://github.com/mrslbt/japan-ux-mcp",
+    "source": "github"
+  },
+  "version": "1.0.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "japan-ux-mcp",
+      "version": "1.0.2",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
