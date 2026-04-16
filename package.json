@@ -1,7 +1,7 @@
 {
   "name": "japan-ux-mcp",
   "version": "1.0.1",
-  "description": "MCP server with Japanese UX patterns for building websites and interfaces for Japan.",
+  "description": "MCP for building Japan-native websites with AI.",
   "main": "dist/index.js",
   "bin": {
     "japan-ux-mcp": "dist/index.js"
