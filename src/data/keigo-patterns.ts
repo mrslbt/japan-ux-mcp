@@ -355,9 +355,53 @@ export function getKeigoLevel(context: Context): KeigoLevel {
   return CONTEXT_TO_KEIGO[context] || "neutral";
 }
 
-export function findPattern(englishText: string): KeigoPattern | undefined {
-  const lower = englishText.toLowerCase();
-  return KEIGO_PATTERNS.find((p) => p.english.toLowerCase() === lower || lower.includes(p.english.toLowerCase()));
+function normalizeEnglishUiText(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[’']/g, "'")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9'\s]/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+const PATTERN_ALIASES: Partial<Record<KeigoPattern["id"], string[]>> = {
+  error_invalid_email: ["invalid email", "email is invalid", "email address is invalid", "invalid e mail address"],
+  error_required_field: ["required", "required field", "this field is required"],
+  error_password_short: ["password too short", "password is too short"],
+  error_session_expired: ["session expired", "your session expired", "your session has expired"],
+  error_network: ["network error", "please try again"],
+  button_submit: ["submit", "send"],
+  button_register: ["register", "sign up", "signup", "create account"],
+  button_login: ["log in", "login", "sign in", "signin"],
+  button_cancel: ["cancel"],
+  button_save: ["save"],
+  button_delete: ["delete", "remove"],
+  button_search: ["search", "find"],
+  button_purchase: ["purchase", "buy", "buy now", "checkout"],
+  button_confirm: ["confirm"],
+  button_next: ["next", "continue"],
+  button_back: ["back", "go back"],
+  empty_no_results: ["no results", "no results found", "nothing found"],
+  empty_no_notifications: ["no notifications"],
+  empty_no_transactions: ["no transactions yet"],
+  confirm_delete: ["delete this", "are you sure you want to delete this"],
+  confirm_logout: ["log out", "logout", "are you sure you want to log out"],
+};
+
+export function findPattern(englishText: string, element?: UiElement): KeigoPattern | undefined {
+  const normalizedInput = normalizeEnglishUiText(englishText);
+  const candidates = element
+    ? KEIGO_PATTERNS.filter((pattern) => pattern.element === element)
+    : KEIGO_PATTERNS;
+
+  return candidates.find((pattern) => {
+    const normalizedPattern = normalizeEnglishUiText(pattern.english);
+    if (normalizedPattern === normalizedInput) return true;
+
+    const aliases = PATTERN_ALIASES[pattern.id] || [];
+    return aliases.some((alias) => normalizeEnglishUiText(alias) === normalizedInput);
+  });
 }
 
 export function suggestKeigo(text: string, element: UiElement, context: Context): {
@@ -368,13 +412,13 @@ export function suggestKeigo(text: string, element: UiElement, context: Context)
   note: string;
 } {
   const targetLevel = getKeigoLevel(context);
-  const pattern = findPattern(text) || KEIGO_PATTERNS.find((p) => p.element === element);
+  const pattern = findPattern(text, element);
 
   const LEVEL_NAMES: Record<KeigoLevel, string> = {
     casual: "カジュアル",
-    neutral: "丁寧語 (teineigo)",
-    formal: "尊敬語 (sonkeigo)",
-    very_formal: "謙譲語 (kenjogo)",
+    neutral: "です/ます (desu/masu)",
+    formal: "ビジネス敬語 (business keigo)",
+    very_formal: "最上級敬語 (highest keigo)",
   };
 
   const LEVEL_CONTEXTS: Record<KeigoLevel, string> = {
@@ -407,6 +451,6 @@ export function suggestKeigo(text: string, element: UiElement, context: Context)
     level: targetLevel,
     levelJapanese: LEVEL_NAMES[targetLevel],
     alternatives: [],
-    note: `No pre-built pattern found. Target keigo level for ${context} context is ${targetLevel} (${LEVEL_NAMES[targetLevel]}).`,
+    note: `No pre-built pattern found for this ${element}. Target keigo level for ${context} context is ${targetLevel} (${LEVEL_NAMES[targetLevel]}).`,
   };
 }
