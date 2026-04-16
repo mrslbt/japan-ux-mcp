@@ -218,7 +218,7 @@ Prompt templates you can call from any MCP client that supports them.
 | `japan_score` | Score a page description for Japan-readiness |
 | `japan_typography` | Check CSS for Japanese typography issues |
 | `japan_seasonal` | Get seasonal design context for a specific month |
-| `japan_full_audit` | Run a comprehensive 7-category Japanese UX audit |
+| `japan_full_audit` | Run a full 7-category Japanese UX audit |
 
 ---
 
