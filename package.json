@@ -1,0 +1,42 @@
+{
+  "name": "japan-ux-mcp",
+  "version": "1.0.0",
+  "description": "Japanese UX patterns for AI. MCP server that encodes Japanese design conventions into AI workflows.",
+  "main": "dist/index.js",
+  "bin": {
+    "japan-ux-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "japanese",
+    "ux",
+    "design",
+    "japan",
+    "localization",
+    "i18n",
+    "forms",
+    "keigo",
+    "ai",
+    "claude",
+    "cursor"
+  ],
+  "author": "Marsel Bait",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2"
+  }
+}
