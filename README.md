@@ -1,8 +1,8 @@
 # japan-ux-mcp
 
-Japanese UX conventions as an MCP server. Works with Claude Code, Cursor, Windsurf, VS Code (Copilot), Claude Desktop, Cline, Zed, and any other MCP-compatible client.
+An MCP server with Japanese UX patterns for designers and developers building websites and interfaces for Japan.
 
-Your AI stops generating Western-default patterns and starts producing correct Japanese UI: proper name order, furigana, 3-field phone numbers, postal code auto-fill, keigo at the right politeness level, Japanese typography rules, seasonal design context, trust signals, and legal compliance.
+It helps your assistant produce Japan-ready forms, copy, typography, trust signals, and seasonal context: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, and Japanese typography rules.
 
 `9 tools` · `9 prompts` · `9 resources` · `15 data files` · `no API keys`
 
@@ -188,7 +188,7 @@ Then point your client config to the built file:
 
 ## Tools
 
-These get called automatically when the AI recognizes a Japanese UX context. You don't need to reference them by name.
+These are available as MCP tools. You can call them directly, or let the client use them when the prompt clearly points to a Japanese UX task.
 
 | Tool | What it does |
 |------|-------------|
@@ -364,7 +364,7 @@ Everything runs locally. No external APIs, no keys, no network calls.
 | Navigation rules | 16 | Header, footer, menu, search, breadcrumb, pagination |
 | Trust signals | 20 | Company info, social proof, certifications, contact |
 | Legal requirements | 10 | 特定商取引法, APPI, 景品表示法, 薬機法, and more |
-| Seasonal events | 24 | Full year with design impact and business notes |
+| Seasonal events | 25 | Full year with design impact and business notes |
 | Microseasons | 24 | 二十四節気 with approximate dates |
 | Color meanings | 9 | Japanese-specific color associations with hex values |
 | Platform patterns | 30+ | LINE, QR codes, mobile payments, IME handling, social sharing |
@@ -392,7 +392,7 @@ Everything runs locally. No external APIs, no keys, no network calls.
 | No italics | Japanese has no italic form. Use bold, color, or size for emphasis |
 | Line-height 1.8+ | Kanji density requires more vertical space than Latin text |
 | 16px body minimum | Kanji readability breaks below 14px |
-| Kinsoku shori | word-break: keep-all. Never start a line with punctuation |
+| Kinsoku shori | word-break: keep-all + line-break: strict. Never start a line with punctuation |
 | Font stacks | Hiragino Sans, Yu Gothic, Meiryo cascade. Noto Sans JP for web fonts |
 | Mixed EN/JP | English font first, Japanese fallback: "Inter", "Noto Sans JP", sans-serif |
 

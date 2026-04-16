@@ -32,6 +32,20 @@ export interface ScoreResult {
   priority_fixes: PriorityFix[];
 }
 
+function hasPersonalNameField(markup: string): boolean {
+  return (
+    /name=["']?(?:name|full.?name|first.?name|firstname|first_name|given.?name|last.?name|lastname|last_name|family.?name|surname|sei|mei)\b/i.test(markup)
+    || /(?:お名前|氏名)(?!順)/.test(markup)
+  );
+}
+
+function hasFuriganaField(markup: string): boolean {
+  return (
+    /name=["']?(?:sei_kana|mei_kana|furigana|kana)\b/i.test(markup)
+    || /フリガナ|ふりがな/.test(markup)
+  );
+}
+
 export function scoreJapanReadiness(params: ScoreParams): ScoreResult {
   const { markup, description, context, include_suggestions } = params;
   const lower = markup.toLowerCase();
@@ -52,7 +66,7 @@ export function scoreJapanReadiness(params: ScoreParams): ScoreResult {
     formsWins.push("Split name into 姓 and 名 fields");
     formsScore -= 25;
   }
-  if (/name=|お名前|名前/i.test(lower) && !/kana|furigana|フリガナ|ふりがな/i.test(lower)) {
+  if (hasPersonalNameField(markup) && !hasFuriganaField(markup)) {
     formsIssues.push("No furigana fields");
     formsWins.push("Add furigana row (セイ / メイ)");
     formsScore -= 20;

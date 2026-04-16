@@ -1,7 +1,7 @@
 {
   "name": "japan-ux-mcp",
   "version": "1.0.0",
-  "description": "Japanese UX patterns for AI. MCP server that encodes Japanese design conventions into AI workflows.",
+  "description": "MCP server with Japanese UX patterns for building websites and interfaces for Japan.",
   "main": "dist/index.js",
   "bin": {
     "japan-ux-mcp": "dist/index.js"
@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "npm run build && node --test test/*.test.mjs"
   },
   "keywords": [
     "mcp",
@@ -27,6 +28,13 @@
   ],
   "author": "Marsel Bait",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mrslbt/japan-ux-mcp.git"
+  },
   "type": "module",
   "files": [
     "dist"

@@ -82,6 +82,7 @@ export function generateJpForm(params: GenerateFormParams): { markup: string; no
   const isJsx = format === "jsx" || format === "tsx";
   const level = getKeigoLevel(context);
   const buttonText = getButtonText(type, level);
+  const currentYear = new Date().getFullYear();
   const cls = (name: string) => isJsx ? `className="${name}"` : `class="${name}"`;
   const maxLen = (n: number) => isJsx ? `maxLength={${n}}` : `maxlength="${n}"`;
   const i = "  ";
@@ -98,7 +99,7 @@ export function generateJpForm(params: GenerateFormParams): { markup: string; no
         lines.push(`${i}<fieldset>`);
         if (include_labels) lines.push(`${i}${i}<legend>${label("name", language)}</legend>`);
         lines.push(`${i}${i}<div ${cls("name-fields")}>`);
-        const valAttr = include_validation ? ' pattern="[一-龥ぁ-んァ-ン]+"' : "";
+        const valAttr = include_validation ? ' pattern="[一-龥ぁ-んァ-ヶー々〇]+"' : "";
         lines.push(`${i}${i}${i}<label>${label("sei", language)} <input name="sei"${valAttr} required /></label>`);
         lines.push(`${i}${i}${i}<label>${label("mei", language)} <input name="mei"${valAttr} required /></label>`);
         lines.push(`${i}${i}</div>`);
@@ -175,7 +176,7 @@ export function generateJpForm(params: GenerateFormParams): { markup: string; no
         lines.push(`${i}<fieldset>`);
         if (include_labels) lines.push(`${i}${i}<legend>${label("dob", language)}</legend>`);
         lines.push(`${i}${i}<div ${cls("date-fields")}>`);
-        const minMax = include_validation ? ' min="1900" max="2026"' : "";
+        const minMax = include_validation ? ` min="1900" max="${currentYear}"` : "";
         lines.push(`${i}${i}${i}<label>${label("year", language)} <input name="birth_year" type="number"${minMax} placeholder="1990" /></label>`);
         lines.push(`${i}${i}${i}<label>${label("month", language)} <input name="birth_month" type="number"${include_validation ? ' min="1" max="12"' : ""} placeholder="1" /></label>`);
         lines.push(`${i}${i}${i}<label>${label("day", language)} <input name="birth_day" type="number"${include_validation ? ' min="1" max="31"' : ""} placeholder="1" /></label>`);

@@ -34,6 +34,54 @@ function getSubmitText(context: Context): string {
   return map[level];
 }
 
+const FIRST_NAME_NAME_PATTERN = "(?:first.?name|firstname|first_name|given.?name)";
+const LAST_NAME_NAME_PATTERN = "(?:last.?name|lastname|last_name|surname|family.?name)";
+const SINGLE_NAME_NAME_PATTERN = "(?:name|full.?name)";
+const PHONE_NAME_PATTERN = "(?:phone|tel)";
+const ADDRESS_NAME_PATTERN = "(?:address|street)";
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractAttribute(attrs: string, name: string): string | null {
+  const quoted = attrs.match(new RegExp(`${name}\\s*=\\s*(["'])(.*?)\\1`, "i"));
+  if (quoted) return quoted[2];
+
+  const unquoted = attrs.match(new RegExp(`${name}\\s*=\\s*([^\\s>]+)`, "i"));
+  return unquoted ? unquoted[1] : null;
+}
+
+function extractStylingAttrs(attrs: string, preserveStyling: boolean): string {
+  if (!preserveStyling || !attrs) return "";
+
+  const preserved = [
+    ...(attrs.match(/\sclass(?:Name)?=(["']).*?\1/gi) || []),
+    ...(attrs.match(/\sstyle=(["']).*?\1/gi) || []),
+    ...(attrs.match(/\s(?:aria|data)-[\w-]+=(["']).*?\1/gi) || []),
+  ];
+
+  return Array.from(new Set(preserved)).join("");
+}
+
+function removeAssociatedLabel(markup: string, attrs: string): string {
+  let next = markup;
+  const labelTargets = [
+    extractAttribute(attrs, "id"),
+    extractAttribute(attrs, "name"),
+  ].filter((value): value is string => Boolean(value));
+
+  for (const target of labelTargets) {
+    const labelRegex = new RegExp(
+      `<label[^>]*for=["']?${escapeRegex(target)}["']?[^>]*>[\\s\\S]*?<\\/label>\\s*`,
+      "i"
+    );
+    next = next.replace(labelRegex, "");
+  }
+
+  return next;
+}
+
 export function transformForJapan(params: TransformParams): TransformResult {
   const { markup, context, format, preserve_styling } = params;
   const isJsx = format === "jsx" || format === "tsx";
@@ -49,17 +97,70 @@ export function transformForJapan(params: TransformParams): TransformResult {
   let transformed = markup;
   const changes: Change[] = [];
 
-  // 1. Fix name fields: firstName/lastName → sei/mei
-  const firstNameRegex = /<label[^>]*>[^<]*(?:first\s*name|given\s*name)[^<]*<input[^>]*name=["']?(first.?name|firstname|first_name|given.?name)["']?[^>]*\/?>[^<]*<\/label>/gi;
-  const lastNameRegex = /<label[^>]*>[^<]*(?:last\s*name|family\s*name|surname)[^<]*<input[^>]*name=["']?(last.?name|lastname|last_name|surname|family.?name)["']?[^>]*\/?>[^<]*<\/label>/gi;
+  const firstNameWrappedRegex = new RegExp(
+    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${FIRST_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    "gi"
+  );
+  const lastNameWrappedRegex = new RegExp(
+    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${LAST_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    "gi"
+  );
+  const singleNameWrappedRegex = new RegExp(
+    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${SINGLE_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    "gi"
+  );
+  const singlePhoneWrappedRegex = new RegExp(
+    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${PHONE_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    "gi"
+  );
+  const addressWrappedRegex = new RegExp(
+    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${ADDRESS_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    "gi"
+  );
 
-  const hadFirstName = firstNameRegex.test(transformed);
-  const hadLastName = lastNameRegex.test(transformed);
+  const firstNameInputRegex = new RegExp(
+    `<input\\b([^>]*\\bname=["']?${FIRST_NAME_NAME_PATTERN}["']?[^>]*)\\/?>`,
+    "i"
+  );
+  const lastNameInputRegex = new RegExp(
+    `<input\\b([^>]*\\bname=["']?${LAST_NAME_NAME_PATTERN}["']?[^>]*)\\/?>`,
+    "i"
+  );
+  const singleNameInputRegex = new RegExp(
+    `<input\\b([^>]*\\bname=["']?${SINGLE_NAME_NAME_PATTERN}["']?[^>]*)\\/?>`,
+    "i"
+  );
+  const singlePhoneInputRegex = new RegExp(
+    `<input\\b([^>]*\\bname=["']?${PHONE_NAME_PATTERN}["']?[^>]*)\\/?>`,
+    "i"
+  );
+  const addressInputRegex = new RegExp(
+    `<input\\b([^>]*\\bname=["']?${ADDRESS_NAME_PATTERN}["']?[^>]*)\\/?>`,
+    "i"
+  );
+
+  // 1. Fix name fields: firstName/lastName → sei/mei
+  const firstNameInputMatch = transformed.match(firstNameInputRegex);
+  const lastNameInputMatch = transformed.match(lastNameInputRegex);
+  const hadFirstName = Boolean(firstNameInputMatch);
+  const hadLastName = Boolean(lastNameInputMatch);
 
   if (hadFirstName || hadLastName) {
-    // Remove old name fields
-    transformed = transformed.replace(firstNameRegex, "");
-    transformed = transformed.replace(lastNameRegex, "");
+    const firstNameAttrs = extractStylingAttrs(firstNameInputMatch?.[1] || "", preserve_styling);
+    const lastNameAttrs = extractStylingAttrs(lastNameInputMatch?.[1] || "", preserve_styling);
+    const furiganaAttrs = firstNameAttrs || lastNameAttrs;
+
+    transformed = transformed.replace(firstNameWrappedRegex, "");
+    transformed = transformed.replace(lastNameWrappedRegex, "");
+
+    if (firstNameInputMatch) {
+      transformed = removeAssociatedLabel(transformed, firstNameInputMatch[1] || "");
+      transformed = transformed.replace(firstNameInputMatch[0], "");
+    }
+    if (lastNameInputMatch) {
+      transformed = removeAssociatedLabel(transformed, lastNameInputMatch[1] || "");
+      transformed = transformed.replace(lastNameInputMatch[0], "");
+    }
 
     // Find insertion point (after form tag or first fieldset)
     const insertAfter = transformed.match(/<form[^>]*>/i);
@@ -69,12 +170,12 @@ export function transformForJapan(params: TransformParams): TransformResult {
   <fieldset>
     <legend>お名前</legend>
     <div ${cls("name-fields")}>
-      <label>姓 <input name="sei" pattern="[一-龥ぁ-んァ-ン]+" required /></label>
-      <label>名 <input name="mei" pattern="[一-龥ぁ-んァ-ン]+" required /></label>
+      <label>姓 <input name="sei"${lastNameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>名 <input name="mei"${firstNameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
     </div>
     <div ${cls("furigana-fields")}>
-      <label>セイ <input name="sei_kana" pattern="[ァ-ヶー]+" required /></label>
-      <label>メイ <input name="mei_kana" pattern="[ァ-ヶー]+" required /></label>
+      <label>セイ <input name="sei_kana"${furiganaAttrs} pattern="[ァ-ヶー]+" required /></label>
+      <label>メイ <input name="mei_kana"${furiganaAttrs} pattern="[ァ-ヶー]+" required /></label>
     </div>
   </fieldset>`;
       transformed = transformed.slice(0, insertIdx) + nameBlock + transformed.slice(insertIdx);
@@ -92,17 +193,20 @@ export function transformForJapan(params: TransformParams): TransformResult {
 
   // 2. Fix single name field
   if (!hadFirstName && !hadLastName) {
-    const singleNameRegex = /<label[^>]*>[^<]*(?:full\s*name|name)[^<]*<input[^>]*name=["']?name["']?[^>]*\/?>[^<]*<\/label>/gi;
-    if (singleNameRegex.test(transformed)) {
-      transformed = transformed.replace(singleNameRegex, `<fieldset>
+    const singleNameInputMatch = transformed.match(singleNameInputRegex);
+    if (singleNameInputMatch) {
+      const nameAttrs = extractStylingAttrs(singleNameInputMatch[1] || "", preserve_styling);
+      transformed = transformed.replace(singleNameWrappedRegex, "");
+      transformed = removeAssociatedLabel(transformed, singleNameInputMatch[1] || "");
+      transformed = transformed.replace(singleNameInputMatch[0], `<fieldset>
     <legend>お名前</legend>
     <div ${cls("name-fields")}>
-      <label>姓 <input name="sei" pattern="[一-龥ぁ-んァ-ン]+" required /></label>
-      <label>名 <input name="mei" pattern="[一-龥ぁ-んァ-ン]+" required /></label>
+      <label>姓 <input name="sei"${nameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>名 <input name="mei"${nameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
     </div>
     <div ${cls("furigana-fields")}>
-      <label>セイ <input name="sei_kana" pattern="[ァ-ヶー]+" required /></label>
-      <label>メイ <input name="mei_kana" pattern="[ァ-ヶー]+" required /></label>
+      <label>セイ <input name="sei_kana"${nameAttrs} pattern="[ァ-ヶー]+" required /></label>
+      <label>メイ <input name="mei_kana"${nameAttrs} pattern="[ァ-ヶー]+" required /></label>
     </div>
   </fieldset>`);
       changes.push({
@@ -113,16 +217,19 @@ export function transformForJapan(params: TransformParams): TransformResult {
   }
 
   // 3. Fix single phone field → 3 fields
-  const singlePhoneRegex = /<label[^>]*>[^<]*(?:phone|tel)[^<]*<input[^>]*name=["']?phone["']?[^>]*\/?>[^<]*<\/label>/gi;
-  if (singlePhoneRegex.test(transformed)) {
-    transformed = transformed.replace(singlePhoneRegex, `<fieldset>
+  const singlePhoneInputMatch = transformed.match(singlePhoneInputRegex);
+  if (singlePhoneInputMatch) {
+    const phoneAttrs = extractStylingAttrs(singlePhoneInputMatch[1] || "", preserve_styling);
+    transformed = transformed.replace(singlePhoneWrappedRegex, "");
+    transformed = removeAssociatedLabel(transformed, singlePhoneInputMatch[1] || "");
+    transformed = transformed.replace(singlePhoneInputMatch[0], `<fieldset>
     <legend>電話番号</legend>
     <div ${cls("phone-fields")}>
-      <input name="phone1" type="tel" pattern="[0-9]{2,5}" ${maxLen(5)} placeholder="090" />
+      <input name="phone1" type="tel"${phoneAttrs} pattern="[0-9]{2,5}" ${maxLen(5)} placeholder="090" />
       <span>-</span>
-      <input name="phone2" type="tel" pattern="[0-9]{1,4}" ${maxLen(4)} placeholder="1234" />
+      <input name="phone2" type="tel"${phoneAttrs} pattern="[0-9]{1,4}" ${maxLen(4)} placeholder="1234" />
       <span>-</span>
-      <input name="phone3" type="tel" pattern="[0-9]{4}" ${maxLen(4)} placeholder="5678" />
+      <input name="phone3" type="tel"${phoneAttrs} pattern="[0-9]{4}" ${maxLen(4)} placeholder="5678" />
     </div>
   </fieldset>`);
     changes.push({
@@ -134,35 +241,34 @@ export function transformForJapan(params: TransformParams): TransformResult {
   // 4. Fix address: add postal code if missing
   const hasAddress = /name=["']?(address|street|city)["']?/i.test(transformed);
   const hasPostal = /name=["']?(postal|zip)["']?/i.test(transformed) || /〒|郵便/.test(transformed);
+  const addressInputMatch = transformed.match(addressInputRegex);
 
-  if (hasAddress && !hasPostal) {
-    const addressRegex = /<label[^>]*>[^<]*(?:address|street)[^<]*<input[^>]*name=["']?(address|street)["']?[^>]*\/?>[^<]*<\/label>/i;
-    const addressMatch = transformed.match(addressRegex);
-    if (addressMatch) {
-      const idx = transformed.indexOf(addressMatch[0]);
-      const postalBlock = `<fieldset>
+  if (hasAddress && !hasPostal && addressInputMatch) {
+    const addressAttrs = extractStylingAttrs(addressInputMatch[1] || "", preserve_styling);
+    const postalBlock = `<fieldset>
     <legend>ご住所</legend>
     <div ${cls("postal-code-field")}>
       <label>〒 郵便番号
-        <input name="postal_code" pattern="[0-9]{3}-?[0-9]{4}" ${maxLen(8)} placeholder="150-0001" />
+        <input name="postal_code"${addressAttrs} pattern="[0-9]{3}-?[0-9]{4}" ${maxLen(8)} placeholder="150-0001" />
       </label>
       <button type="button" ${cls("postal-lookup-btn")}>住所検索</button>
     </div>
     <label>都道府県
-      <select name="prefecture">
+      <select name="prefecture"${addressAttrs}>
         <option value="">選択してください</option>
       </select>
     </label>
-    <label>市区町村 <input name="city" /></label>
-    <label>番地 <input name="address_line" placeholder="1-2-3" /></label>
-    <label>建物名・部屋番号 <input name="building" placeholder="メゾン原宿 301" /></label>
+    <label>市区町村 <input name="city"${addressAttrs} /></label>
+    <label>番地 <input name="address_line"${addressAttrs} placeholder="1-2-3" /></label>
+    <label>建物名・部屋番号 <input name="building"${addressAttrs} placeholder="メゾン原宿 301" /></label>
   </fieldset>`;
-      transformed = transformed.slice(0, idx) + postalBlock + transformed.slice(idx + addressMatch[0].length);
-      changes.push({
-        what: "Restructured address to 〒 postal → prefecture → city → block → building",
-        why: "Japanese addresses go large-to-small, starting with postal code auto-fill",
-      });
-    }
+    transformed = transformed.replace(addressWrappedRegex, "");
+    transformed = removeAssociatedLabel(transformed, addressInputMatch[1] || "");
+    transformed = transformed.replace(addressInputMatch[0], postalBlock);
+    changes.push({
+      what: "Restructured address to 〒 postal → prefecture → city → block → building",
+      why: "Japanese addresses go large-to-small, starting with postal code auto-fill",
+    });
   }
 
   // 5. Fix button text
