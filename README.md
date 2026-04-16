@@ -4,7 +4,7 @@ An MCP server with Japanese UX patterns for designers and developers building we
 
 It helps your assistant produce Japan-ready forms, copy, typography, trust signals, and seasonal context: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, and Japanese typography rules.
 
-`9 tools` · `9 prompts` · `9 resources` · `15 data files` · `no API keys`
+`10 tools` · `10 prompts` · `9 resources` · `15 data files` · `no API keys`
 
 ---
 
@@ -201,6 +201,7 @@ These are available as MCP tools. You can call them directly, or let the client 
 | `check_jp_typography` | Audits CSS for Japanese typography: font stacks, line-height, kinsoku shori, font sizing, palt |
 | `get_seasonal_context` | Returns current season, active events, 24 microseasons (二十四節気), launch blackout warnings |
 | `audit_japan_ux` | Full 7-category audit: layout, typography, visual, navigation, trust, content, mobile. Letter grade A-F |
+| `design_direction_for_japan` | Turns brand type, audience, and industry into a Japan-specific design brief: density, palette, typography, imagery, CTAs, trust layout |
 
 ---
 
@@ -219,6 +220,7 @@ Prompt templates you can call from any MCP client that supports them.
 | `japan_typography` | Check CSS for Japanese typography issues |
 | `japan_seasonal` | Get seasonal design context for a specific month |
 | `japan_full_audit` | Run a full 7-category Japanese UX audit |
+| `japan_design_direction` | Generate a Japan-specific visual direction for a site or interface |
 
 ---
 

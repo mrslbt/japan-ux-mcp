@@ -5,6 +5,7 @@ import { suggestKeigoLevel } from "../dist/tools/suggest-keigo-level.js";
 import { scoreJapanReadiness } from "../dist/tools/score-japan-readiness.js";
 import { transformForJapan } from "../dist/tools/transform-for-japan.js";
 import { generateJpForm } from "../dist/tools/generate-jp-form.js";
+import { designDirectionForJapan } from "../dist/tools/design-direction-for-japan.js";
 
 test("unknown keigo text does not fall back to an unrelated canned phrase", () => {
   const buttonResult = suggestKeigoLevel({
@@ -79,4 +80,22 @@ test("generated date-of-birth year validation uses the current year", () => {
   });
 
   assert.match(markup, new RegExp(`max="${currentYear}"`));
+});
+
+test("design direction infers Japan-specific guidance from loose brand, audience, and industry input", () => {
+  const result = designDirectionForJapan({
+    brand_type: "premium",
+    audience: "domestic travelers",
+    industry: "luxury ryokan",
+  });
+
+  assert.equal(result.normalized_inputs.brand_type, "premium_elegant");
+  assert.equal(result.normalized_inputs.audience, "domestic_travelers");
+  assert.equal(result.normalized_inputs.industry, "luxury");
+  assert.equal(result.normalized_inputs.recommended_context, "luxury_hospitality");
+  assert.ok(result.color_palette.length > 0);
+  assert.ok(result.typography.display_stack.includes("Noto Serif JP"));
+  assert.ok(result.cta_style.labels.includes("ご予約"));
+  assert.ok(result.trust_layout.hero.length > 0);
+  assert.ok(result.section_priorities.some((section) => section.section.includes("アクセス")));
 });
