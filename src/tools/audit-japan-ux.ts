@@ -1,8 +1,3 @@
-import { LAYOUT_RULES } from "../data/layout-patterns.js";
-import { TYPOGRAPHY_RULES } from "../data/typography-rules.js";
-import { VISUAL_RULES } from "../data/visual-rules.js";
-import { NAVIGATION_RULES } from "../data/navigation-patterns.js";
-import { TRUST_SIGNALS } from "../data/trust-legal.js";
 import type { Context } from "../data/keigo-patterns.js";
 
 interface AuditIssue {
@@ -194,14 +189,14 @@ export function auditJapanUx(params: AuditParams): AuditResult {
   const visualPassed: string[] = [];
   let visualScore = 100;
 
-  // Check for names in red text
-  if (/color\s*:\s*(red|#[fF][0-9a-fA-F]0{4}|#[eE][0-9a-fA-F]{5}|rgb\(2[0-5][0-9]\s*,\s*[0-3])/i.test(combined) &&
-      /name|名前|氏名/i.test(lower)) {
+  // Check for names in red text (look for red styling on elements that contain name-related attributes or text)
+  const redNamePattern = /(?:color\s*:\s*(?:red|#[fF][0-9a-fA-F]0{4}|#[eE][0-9a-fA-F]{5}|rgb\(2[0-5][0-9]\s*,\s*[0-3]))[^}]*(?:name|名前|氏名)|(?:name|名前|氏名)[^}]*(?:color\s*:\s*(?:red|#[fF][0-9a-fA-F]0{4}|#[eE][0-9a-fA-F]{5}|rgb\(2[0-5][0-9]\s*,\s*[0-3]))/i;
+  if (redNamePattern.test(combined)) {
     visualIssues.push({
       category: "visual",
       severity: "critical",
       rule_id: "color_no_red_names",
-      finding: "Red text color near name-related content. Writing names in red = death association in Japan.",
+      finding: "Red text color on name-related content. Writing names in red = death association in Japan.",
       recommendation: "Use black or dark gray for all personal name text.",
     });
     visualScore -= 20;
@@ -319,7 +314,7 @@ export function auditJapanUx(params: AuditParams): AuditResult {
       category: "trust",
       severity: "major",
       rule_id: "trust_missing_info_suspicion",
-      finding: "No company overview (会社概要). Japan's uncertainty avoidance (score: 89) makes this critical.",
+      finding: "No company overview (会社概要). Japan's uncertainty avoidance (score: 92) makes this critical.",
       recommendation: "Add 会社概要 with: company name, representative, address, founding date, capital, employees.",
     });
     trustScore -= 15;
@@ -477,7 +472,7 @@ export function auditJapanUx(params: AuditParams): AuditResult {
       if (dims && dims.length >= 2) {
         const w = parseInt(dims[0]);
         const h = parseInt(dims[1]);
-        if ((w < 44 || h < 44) && w > 0 && h > 0 && (w < 44 && h < 44)) {
+        if (w > 0 && h > 0 && (w < 44 || h < 44)) {
           mobileIssues.push({
             category: "mobile",
             severity: "minor",

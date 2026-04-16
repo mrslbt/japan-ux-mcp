@@ -1,7 +1,6 @@
 import {
   suggestKeigo,
   getKeigoLevel,
-  KEIGO_PATTERNS,
   type Context,
   type UiElement,
   type KeigoLevel,
@@ -25,11 +24,24 @@ export interface SuggestKeigoResult {
 export function suggestKeigoLevel(params: SuggestKeigoParams): SuggestKeigoResult {
   const { text, ui_element, context, tone } = params;
 
-  // If tone overrides the context-derived level, map it
+  // Tone can shift the keigo level up or down from the context default
   let effectiveContext = context;
-  if (tone === "friendly" && getKeigoLevel(context) !== "casual") {
-    // Shift one step more casual for "friendly" tone
-    // We don't change the context itself, just note it
+  if (tone) {
+    const levelOrder: KeigoLevel[] = ["casual", "neutral", "formal", "very_formal"];
+    const currentLevel = getKeigoLevel(context);
+    const currentIdx = levelOrder.indexOf(currentLevel);
+    if (tone === "friendly" && currentIdx > 0) {
+      // Map to a context that produces one level more casual
+      const targetLevel = levelOrder[currentIdx - 1];
+      const contextForLevel = Object.entries({ youth_app: "casual", consumer_app: "neutral", b2b_saas: "formal", government: "very_formal" } as Record<string, KeigoLevel>);
+      const match = contextForLevel.find(([, v]) => v === targetLevel);
+      if (match) effectiveContext = match[0] as Context;
+    } else if (tone === "formal" && currentIdx < levelOrder.length - 1) {
+      const targetLevel = levelOrder[currentIdx + 1];
+      const contextForLevel = Object.entries({ youth_app: "casual", consumer_app: "neutral", b2b_saas: "formal", government: "very_formal" } as Record<string, KeigoLevel>);
+      const match = contextForLevel.find(([, v]) => v === targetLevel);
+      if (match) effectiveContext = match[0] as Context;
+    }
   }
 
   const result = suggestKeigo(text, ui_element, effectiveContext);

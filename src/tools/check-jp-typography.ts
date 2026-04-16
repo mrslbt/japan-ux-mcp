@@ -1,4 +1,4 @@
-import { TYPOGRAPHY_RULES, JP_FONT_STACKS, TYPE_SCALE } from "../data/typography-rules.js";
+import { JP_FONT_STACKS, TYPE_SCALE } from "../data/typography-rules.js";
 
 interface TypoIssue {
   rule_id: string;
@@ -76,9 +76,9 @@ export function checkJpTypography(params: CheckTypographyParams): CheckTypograph
   }
 
   // Check font size
-  const fontSizeMatches = css.matchAll(/font-size\s*:\s*(\d+)px/gi);
+  const fontSizeMatchesArr = [...css.matchAll(/font-size\s*:\s*(\d+)px/gi)];
   let hasSmallFont = false;
-  for (const match of fontSizeMatches) {
+  for (const match of fontSizeMatchesArr) {
     const size = parseInt(match[1]);
     if (size < 14) {
       issues.push({
@@ -100,7 +100,7 @@ export function checkJpTypography(params: CheckTypographyParams): CheckTypograph
       score -= 5;
     }
   }
-  if (!hasSmallFont && fontSizeMatches) {
+  if (!hasSmallFont && fontSizeMatchesArr.length > 0) {
     passed.push("Font sizes meet kanji readability minimum");
   }
 
