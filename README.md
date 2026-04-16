@@ -1,6 +1,7 @@
 # Japan UX
 
 [![MCP Badge](https://lobehub.com/badge/mcp-full/mrslbt-japan-ux-mcp?theme=light)](https://lobehub.com/mcp/mrslbt-japan-ux-mcp)
+[![japan-ux-mcp MCP server](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp/badges/card.svg)](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp)
 
 MCP for building Japan-native websites with AI.
 
