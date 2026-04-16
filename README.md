@@ -1,10 +1,8 @@
-# japan-ux-mcp
+# Japan UX
 
-An MCP server with Japanese UX patterns for designers and developers building websites and interfaces for Japan.
+MCP for building Japan-native websites with AI.
 
-It helps your assistant produce Japan-ready forms, copy, typography, trust signals, and seasonal context: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, and Japanese typography rules.
-
-In one line: it gives AI tools the Japanese UX rules they usually miss.
+It gives your AI assistant the Japanese UX rules it usually misses: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, typography rules, trust signals, legal requirements, and seasonal design.
 
 `10 tools` · `10 prompts` · `9 resources` · `15 data files` · `no API keys`
 
