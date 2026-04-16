@@ -4,7 +4,27 @@ An MCP server with Japanese UX patterns for designers and developers building we
 
 It helps your assistant produce Japan-ready forms, copy, typography, trust signals, and seasonal context: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, and Japanese typography rules.
 
+In one line: it gives AI tools the Japanese UX rules they usually miss.
+
 `10 tools` · `10 prompts` · `9 resources` · `15 data files` · `no API keys`
+
+---
+
+## Quick example
+
+Prompt:
+```text
+Transform this signup form for the Japanese market.
+```
+
+Typical result:
+- `firstName / lastName` becomes `姓 / 名`
+- furigana fields are added
+- one phone field becomes a 3-field Japanese phone pattern
+- address flow changes to `〒` postal code → prefecture → city → block → building
+- button copy shifts into appropriate keigo
+
+This is the whole point of the project: less explaining Japan-specific conventions to the AI, more building.
 
 ---
 
@@ -22,6 +42,25 @@ AI generates Western UX by default. If you're building for Japan, you know what 
 - Zero seasonal awareness (launching during Golden Week, Christmas treated as family holiday)
 
 You can correct it every single time, or install this once.
+
+It is most useful for:
+
+- Designers building Japanese sites with AI
+- Developers outside Japan shipping Japan-facing flows
+- Localization teams fixing structural UX issues, not just translation
+- Product teams that want Japan-native defaults from the first prompt
+
+---
+
+## What it does
+
+- Builds Japanese forms with correct name order, furigana, phone splitting, postal flow, and date structure
+- Audits existing markup and CSS for Japanese UX issues
+- Rewrites Western forms into Japan-ready versions with an explained score improvement
+- Suggests keigo-aware UI copy by context
+- Generates realistic Japanese placeholder data
+- Gives seasonal context and design direction for Japanese verticals
+- Surfaces trust, legal, typography, and layout conventions that AI usually misses
 
 ---
 
