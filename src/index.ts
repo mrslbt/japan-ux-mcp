@@ -10,6 +10,9 @@ import { generateJpPlaceholder } from "./tools/generate-jp-placeholder.js";
 import { suggestKeigoLevel } from "./tools/suggest-keigo-level.js";
 import { scoreJapanReadiness } from "./tools/score-japan-readiness.js";
 import { transformForJapan } from "./tools/transform-for-japan.js";
+import { checkJpTypography } from "./tools/check-jp-typography.js";
+import { getSeasonalContext } from "./tools/get-seasonal-context.js";
+import { auditJapanUx } from "./tools/audit-japan-ux.js";
 
 const server = new McpServer({
   name: "japan-ux-mcp",
@@ -174,6 +177,71 @@ server.tool(
   }
 );
 
+// ─── Tool: check_jp_typography ─────────────────────────────────────────────
+server.tool(
+  "check_jp_typography",
+  "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.8+ for Japanese), font sizes (14px minimum for kanji), word-break: keep-all (kinsoku shori), text-on-photo overlays, font-feature-settings 'palt', and more. Returns score, issues, and a recommended font stack for your context.",
+  {
+    css: z.string().describe("CSS content to audit for Japanese typography issues"),
+    markup: z.string().optional().describe("Optional HTML/JSX markup for additional context (background images, text-on-photo detection)"),
+    context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for font stack recommendation"),
+  },
+  async (params) => {
+    const result = checkJpTypography({
+      css: params.css,
+      markup: params.markup,
+      context: params.context,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// ─── Tool: get_seasonal_context ───────────────────────────────────────────
+server.tool(
+  "get_seasonal_context",
+  "Get the current Japanese seasonal context for design decisions. Returns: current season with traditional colors, active events (正月, 花見, お盆, etc.), upcoming events, the current microseason (二十四節気), recommended design colors, and warnings (e.g., do not launch during Golden Week). Covers all 24 Japanese microseasons and 24+ major events.",
+  {
+    month: z.number().min(1).max(12).describe("Month (1-12)"),
+    day: z.number().min(1).max(31).optional().describe("Day of month (defaults to 15)"),
+  },
+  async (params) => {
+    const result = getSeasonalContext({
+      month: params.month,
+      day: params.day,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
+// ─── Tool: audit_japan_ux ─────────────────────────────────────────────────
+server.tool(
+  "audit_japan_ux",
+  "Comprehensive Japanese UX audit covering 7 categories: layout (density, breadcrumbs, CTA placement), typography (fonts, line-height, kinsoku shori), visual (color meanings, red-name taboo, dark theme), navigation (phone number, footer links, hamburger rules), trust (会社概要, case studies, proof numbers, legal links), content (Japanese text, FAQ, pricing tables), and mobile (viewport, tel: links, touch targets). Returns letter grade (A-F), category scores, and prioritized fixes.",
+  {
+    markup: z.string().describe("HTML/JSX markup to audit"),
+    css: z.string().optional().describe("CSS content for typography and visual checks"),
+    url_description: z.string().optional().describe("Description of the page for additional context"),
+    site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).describe("Type of site being audited"),
+    target_audience: z.string().optional().describe("Target audience description"),
+  },
+  async (params) => {
+    const result = auditJapanUx({
+      markup: params.markup,
+      css: params.css,
+      url_description: params.url_description,
+      site_type: params.site_type,
+      target_audience: params.target_audience,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
 // ─── MCP Prompts (show up as slash commands in Claude Code) ─────────────────
 
 server.prompt(
@@ -290,6 +358,65 @@ server.prompt(
         content: {
           type: "text" as const,
           text: `Score this page for Japan-readiness using score_japan_readiness with context "${context}":\n\n${description}\n\nShow the overall score, category breakdown (forms, copy, trust, typography, cultural), and top priority fixes ranked by impact.`,
+        },
+      },
+    ],
+  })
+);
+
+server.prompt(
+  "japan_typography",
+  "Check CSS for Japanese typography issues (fonts, line-height, kinsoku shori, sizing).",
+  {
+    css: z.string().describe("CSS content to check"),
+    context: z.enum(["corporate", "editorial", "casual", "luxury"]).default("corporate").describe("Design context"),
+  },
+  async ({ css, context }) => ({
+    messages: [
+      {
+        role: "user" as const,
+        content: {
+          type: "text" as const,
+          text: `Check this CSS for Japanese typography issues using check_jp_typography with context "${context}":\n\n${css}\n\nShow the score, every issue found with its fix, and recommend a font stack.`,
+        },
+      },
+    ],
+  })
+);
+
+server.prompt(
+  "japan_seasonal",
+  "Get seasonal design context for a specific month.",
+  {
+    month: z.string().default("4").describe("Month number (1-12)"),
+  },
+  async ({ month }) => ({
+    messages: [
+      {
+        role: "user" as const,
+        content: {
+          type: "text" as const,
+          text: `Get the Japanese seasonal design context for month ${month} using get_seasonal_context.\n\nShow: current season with traditional color palette, active events, upcoming events, the current microseason (二十四節気), and any launch/deploy warnings.`,
+        },
+      },
+    ],
+  })
+);
+
+server.prompt(
+  "japan_full_audit",
+  "Run a full Japanese UX audit on a page. Covers layout, typography, visual, navigation, trust, content, and mobile.",
+  {
+    site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).default("corporate").describe("Site type"),
+    description: z.string().describe("Describe the page: what it contains, who it targets, what it does"),
+  },
+  async ({ site_type, description }) => ({
+    messages: [
+      {
+        role: "user" as const,
+        content: {
+          type: "text" as const,
+          text: `Run a comprehensive Japanese UX audit using audit_japan_ux with site_type "${site_type}":\n\n${description}\n\nShow the letter grade, all 7 category scores, every issue found, and the top priority fixes.`,
         },
       },
     ],
@@ -474,6 +601,244 @@ server.resource(
 - Date fields: separate 年/月/日 inputs
 - Show era alongside Gregorian: "1990年 (平成2年)"
 - Government forms may require era format as primary`,
+      },
+    ],
+  })
+);
+
+server.resource(
+  "typography-guide",
+  "japan-ux://typography-guide",
+  { description: "Japanese web typography reference: font stacks, sizing scale, line-height rules, kinsoku shori, and CSS suggestions", mimeType: "text/markdown" },
+  async () => ({
+    contents: [
+      {
+        uri: "japan-ux://typography-guide",
+        mimeType: "text/markdown",
+        text: `# Japanese Typography Guide
+
+## Font Stacks
+
+### System (no web fonts)
+\`font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Yu Gothic", "Meiryo", sans-serif;\`
+
+### Web (Google Fonts)
+\`font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;\`
+
+### Mixed EN/JP Modern
+\`font-family: "Inter", "Noto Sans JP", "Hiragino Sans", sans-serif;\`
+
+### Mixed EN/JP Corporate
+\`font-family: "Roboto", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;\`
+
+## Type Scale (PC / Mobile)
+| Role | PC | Mobile | Weight | Line-height |
+|------|-----|--------|--------|-------------|
+| Hero | 60px | 32px | 700 | 1.4 |
+| H1 | 40px | 26px | 700 | 1.5 |
+| H2 | 35px | 22px | 700 | 1.6 |
+| H3 | 20px | 16px | 700 | 1.7 |
+| Body | 16px | 16px | 400 | 1.8 |
+| Caption | 14px | 13px | 400 | 1.6 |
+
+## Critical Rules
+- **No italics**: Japanese has no italic form. Use bold/color/size for emphasis.
+- **Line-height 1.8+**: Kanji density requires more vertical space than Latin text.
+- **16px body minimum**: Kanji readability breaks below 14px.
+- **word-break: keep-all**: Enables kinsoku shori (never start a line with punctuation).
+- **font-feature-settings: "palt"**: Proportional alternates for better punctuation spacing.
+- **No text-align: justify**: Browsers lack print-quality CJK justification.`,
+      },
+    ],
+  })
+);
+
+server.resource(
+  "seasonal-calendar",
+  "japan-ux://seasonal-calendar",
+  { description: "Full Japanese seasonal calendar with events, 24 microseasons (二十四節気), color palettes, and launch blackout dates", mimeType: "text/markdown" },
+  async () => ({
+    contents: [
+      {
+        uri: "japan-ux://seasonal-calendar",
+        mimeType: "text/markdown",
+        text: `# Japanese Seasonal Design Calendar
+
+## Seasons & Colors
+| Season | Months | Key Colors |
+|--------|--------|------------|
+| 春 Spring | Mar-May | Sakura pink (#FDDDE6), Fresh green (#B9D08B), Wisteria purple (#BBA0CB) |
+| 夏 Summer | Jun-Aug | Ocean blue (#0097DB), Sunflower yellow (#FFC20E), Indigo (#264061) |
+| 秋 Autumn | Sep-Nov | Vermilion (#EB6238), Gold (#C9A84C), Chestnut (#704B38) |
+| 冬 Winter | Dec-Feb | Snow white (#F5F5F5), Silver (#C0C0C0), Crimson (#AD002D), Navy (#223A5E) |
+
+## Launch Blackout Dates
+- **Golden Week**: Apr 29 - May 5 (do NOT launch)
+- **Obon**: Aug 13-16 (many businesses closed)
+- **New Year**: Dec 29 - Jan 3 (everything stops)
+
+## Major Events
+| Event | Date | Design Impact |
+|-------|------|---------------|
+| 正月 New Year | Jan 1-3 | Red, gold, pine/bamboo/plum motifs |
+| バレンタイン Valentine's | Feb 14 | Women give chocolate to men |
+| 花見 Cherry Blossom | Late Mar-Apr | Sakura dominates all design |
+| ゴールデンウィーク | Apr 29-May 5 | DO NOT LAUNCH |
+| お中元 Mid-year Gifts | July | Major ecommerce event |
+| お盆 Obon | Aug 13-16 | Businesses closed, travel peak |
+| ハロウィン Halloween | Oct 31 | Growing, kawaii horror |
+| お歳暮 Year-end Gifts | December | Major ecommerce event |
+| クリスマス Christmas | Dec 25 | Romantic (NOT family) in Japan |
+
+## 二十四節気 (24 Microseasons)
+小寒 (Jan 5) → 大寒 (Jan 20) → 立春 (Feb 4) → 雨水 (Feb 19) → 啓蟄 (Mar 6) → 春分 (Mar 21) → 清明 (Apr 5) → 穀雨 (Apr 20) → 立夏 (May 6) → 小満 (May 21) → 芒種 (Jun 6) → 夏至 (Jun 21) → 小暑 (Jul 7) → 大暑 (Jul 23) → 立秋 (Aug 7) → 処暑 (Aug 23) → 白露 (Sep 8) → 秋分 (Sep 23) → 寒露 (Oct 8) → 霜降 (Oct 23) → 立冬 (Nov 7) → 小雪 (Nov 22) → 大雪 (Dec 7) → 冬至 (Dec 22)`,
+      },
+    ],
+  })
+);
+
+server.resource(
+  "trust-checklist",
+  "japan-ux://trust-checklist",
+  { description: "Japanese trust signals and legal requirements checklist for websites", mimeType: "text/markdown" },
+  async () => ({
+    contents: [
+      {
+        uri: "japan-ux://trust-checklist",
+        mimeType: "text/markdown",
+        text: `# Japanese Trust & Legal Checklist
+
+## Trust Signals (Japan scores 89 on Uncertainty Avoidance)
+
+### Company Info (会社概要) - REQUIRED
+- [ ] Registered address (本店所在地)
+- [ ] Founding year (設立年) in Japanese era + Western
+- [ ] Capital amount (資本金) - minimum 500万円 to look credible
+- [ ] CEO/director names (代表者名) - users Google this
+- [ ] Employee count
+- [ ] Main banks (取引銀行)
+- [ ] Corporate number (法人番号)
+
+### Social Proof - REQUIRED for B2B
+- [ ] Proof numbers near hero (導入社数, improvement %)
+- [ ] 導入事例 (case studies) with named companies and people
+- [ ] お客様の声 (testimonials) with real names and photos
+- [ ] Customer logo grid (6+ logos minimum)
+- [ ] Award badges (ITreview, Boxil, etc.)
+- [ ] メディア掲載 (media coverage) with publication logos
+
+### Contact - REQUIRED
+- [ ] Phone number in HEADER (not just footer)
+- [ ] 0120 toll-free format preferred
+- [ ] Business hours displayed
+
+### Certifications
+- [ ] Privacy Mark (Pマーク) if B2B enterprise
+- [ ] TRUSTe badge if handling sensitive data
+- [ ] SSL badge visible on forms
+
+## Legal Requirements
+
+### ALL Sites
+- [ ] プライバシーポリシー (Privacy Policy) - APPI required
+- [ ] 利用規約 (Terms of Service)
+
+### E-commerce (Legally Required)
+- [ ] 特定商取引法に基づく表記 - seller info, return policy, payment methods
+- [ ] Prices shown tax-inclusive (総額表示 since Apr 2022)
+
+### Industry-Specific
+- [ ] 景品表示法 - No.1 claims need survey proof
+- [ ] 薬機法 - health/beauty claims restricted to 56 categories
+- [ ] 古物営業法 - secondhand goods license number
+- [ ] 資金決済法 - payment service registration number`,
+      },
+    ],
+  })
+);
+
+server.resource(
+  "color-guide",
+  "japan-ux://color-guide",
+  { description: "Japanese color meanings and visual design rules for web", mimeType: "text/markdown" },
+  async () => ({
+    contents: [
+      {
+        uri: "japan-ux://color-guide",
+        mimeType: "text/markdown",
+        text: `# Japanese Color Meanings & Visual Rules
+
+## Color Meanings
+| Color | Japanese | Positive | Negative | Notes |
+|-------|----------|----------|----------|-------|
+| Red #E60033 | 赤 | Prosperity, fortune, vitality | Names in red = death | Safe for buttons, banners. NOT danger-only. |
+| White #FFFFFF | 白 | Purity, cleanliness | Mourning (funeral color) | Context-dependent. Fine for backgrounds. |
+| Black #000000 | 黒 | Formality, power | Black+white = funeral | Add accent color to break funeral association. |
+| Gold #C9A84C | 金 | Luxury, celebration | Overuse = gaudy | Premium tiers, New Year campaigns. |
+| Pink #F4A7B9 | 桜色 | Spring, femininity | Juvenile if overused | Not limited to female products. |
+| Blue #0068B7 | 青 | Trust, stability | Cold/impersonal | Same as Western. Corporate default. |
+| Green #3EB370 | 緑 | Nature, health | - | Food, eco brands. Matcha green is culturally rich. |
+| Purple #884898 | 紫 | Nobility, elegance | Old-fashioned | Historically reserved for highest rank. |
+
+## Critical Rules
+- **NEVER write names in red**: Death association (funeral ink)
+- **Black + white only**: Evokes funeral (add an accent color)
+- **Bright is normal**: Dense, colorful layouts are expected, not spammy
+- **Dark theme lags**: Japan is 2-3 years behind in dark mode adoption
+- **No halation**: Don't place two same-brightness vivid colors adjacent
+- **Red cross is illegal**: Protected by law, use a different medical icon
+- **Consistent shadows**: All shadows from the same direction on one page
+- **Nested radius**: outer border-radius = inner + padding`,
+      },
+    ],
+  })
+);
+
+server.resource(
+  "layout-guide",
+  "japan-ux://layout-guide",
+  { description: "Japanese web layout conventions: grid, spacing, density, responsive breakpoints", mimeType: "text/markdown" },
+  async () => ({
+    contents: [
+      {
+        uri: "japan-ux://layout-guide",
+        mimeType: "text/markdown",
+        text: `# Japanese Web Layout Guide
+
+## Artboard Sizes
+- **PC**: 1280x832px (standard design width)
+- **Mobile**: 375x812px (iPhone reference)
+- **Tablet**: not delivered by designers, developers interpolate
+
+## Grid & Spacing
+| Element | PC | Mobile |
+|---------|-----|--------|
+| Columns | 12 | - |
+| Side margins | 140-160px | 20px |
+| Content width | 960-1000px | 335px |
+| Section spacing | 100px | 60px |
+| Inner spacing | 40px | 24-32px |
+| Card gaps | 24-40px | 16-20px |
+| Header height | ~100px | ~70px |
+| First-view | 1280x720 (16:9) | - |
+
+## Breakpoints
+| Device | Width |
+|--------|-------|
+| PC | 1280px |
+| Tablet | 768px |
+| Mobile | 375px |
+
+## Key Patterns
+- **Density is trust**: Pack content. Sparse = hiding information.
+- **Chirashi tradition**: Web inherits flyer layout density.
+- **Alternating zigzag**: Image-left/text-right, then reverse.
+- **Long single-page scrollers**: Standard for 30+ demographic.
+- **Boxy sections**: Distinct background per section.
+- **Repeat CTAs**: Place at hero, mid-page, and before footer.
+- **Breadcrumbs**: Required on all interior pages.
+- **News section (お知らせ)**: Required on corporate homepages.
+- **Floating contact button**: Fixed right-edge お問い合わせ.`,
       },
     ],
   })
