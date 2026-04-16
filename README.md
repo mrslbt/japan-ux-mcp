@@ -1,5 +1,7 @@
 # Japan UX
 
+[![MCP Badge](https://lobehub.com/badge/mcp-full/mrslbt-japan-ux-mcp?theme=light)](https://lobehub.com/mcp/mrslbt-japan-ux-mcp)
+
 MCP for building Japan-native websites with AI.
 
 It gives your AI assistant the Japanese UX rules it usually misses: `姓 / 名` order, furigana, 3-field phone numbers, 〒 postal flow, keigo-aware labels, typography rules, trust signals, legal requirements, and seasonal design.
