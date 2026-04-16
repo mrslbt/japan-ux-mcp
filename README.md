@@ -463,27 +463,6 @@ Designers who build with AI and want Japanese patterns available from the start 
 
 ---
 
-## Roadmap
-
-- [x] 6 core tools: forms, validation, placeholders, keigo, scoring, transformation
-- [x] MCP prompts and resources
-- [x] Seasonal context tool with 24 events, 24 microseasons, launch blackout warnings
-- [x] Typography checker for JP/EN mixed text
-- [x] Full 7-category UX audit tool (layout, typography, visual, navigation, trust, content, mobile)
-- [x] Trust signals and legal requirements data (特定商取引法, APPI, 景品表示法, 薬機法)
-- [x] Visual rules (color meanings, red-name taboo, halation)
-- [x] Layout patterns (grid, spacing, density, responsive breakpoints)
-- [x] Navigation patterns (headers, footers, menus, breadcrumbs)
-- [x] Platform integration data (LINE, QR, payments, IME, social sharing)
-- [x] JIS X 8341-3 accessibility rules
-- [x] Content patterns (density, copy, product pages)
-- [ ] Address formatter with postal code API
-- [ ] Reference site database by business vertical
-- [ ] Design direction matrix
-- [ ] Community-contributed patterns
-
----
-
 ## License
 
 [MIT](LICENSE)
