@@ -13,6 +13,7 @@ import { transformForJapan } from "./tools/transform-for-japan.js";
 import { checkJpTypography } from "./tools/check-jp-typography.js";
 import { getSeasonalContext } from "./tools/get-seasonal-context.js";
 import { auditJapanUx } from "./tools/audit-japan-ux.js";
+import { designDirectionForJapan } from "./tools/design-direction-for-japan.js";
 
 const server = new McpServer({
   name: "japan-ux-mcp",
@@ -242,6 +243,27 @@ server.tool(
   }
 );
 
+// ─── Tool: design_direction_for_japan ──────────────────────────────────────
+server.tool(
+  "design_direction_for_japan",
+  "Generate a Japan-specific visual direction for a website or interface. Takes a loose brand type, audience, and industry, then returns a practical design brief covering visual direction, information density, color palette, typography, imagery style, CTA style, trust layout, and section priorities.",
+  {
+    brand_type: z.string().describe("Brand expression such as 'modern minimal', 'premium', 'friendly', 'traditional craft'"),
+    audience: z.string().describe("Target audience such as 'business buyers', 'families', 'seniors', 'domestic travelers'"),
+    industry: z.string().describe("Industry or site type such as 'B2B SaaS', 'clinic', 'luxury ryokan', 'ecommerce', 'corporate'"),
+  },
+  async (params) => {
+    const result = designDirectionForJapan({
+      brand_type: params.brand_type,
+      audience: params.audience,
+      industry: params.industry,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
+
 // ─── MCP Prompts (show up as slash commands in Claude Code) ─────────────────
 
 server.prompt(
@@ -423,6 +445,27 @@ server.prompt(
   })
 );
 
+server.prompt(
+  "japan_design_direction",
+  "Get a Japan-specific design direction for a site or interface.",
+  {
+    brand_type: z.string().describe("Brand expression such as modern minimal, premium, friendly, or traditional"),
+    audience: z.string().describe("Target audience"),
+    industry: z.string().describe("Industry or site type"),
+  },
+  async ({ brand_type, audience, industry }) => ({
+    messages: [
+      {
+        role: "user" as const,
+        content: {
+          type: "text" as const,
+          text: `Create a Japan-specific design direction using design_direction_for_japan.\n\nBrand type: ${brand_type}\nAudience: ${audience}\nIndustry: ${industry}\n\nReturn a practical brief with visual direction, density, color palette, typography, imagery style, CTA style, trust layout, and the sections to prioritize.`,
+        },
+      },
+    ],
+  })
+);
+
 // ─── MCP Resources (reference data accessible to Claude) ────────────────────
 
 server.resource(
@@ -440,9 +483,9 @@ server.resource(
 | Level | Japanese | When to use |
 |-------|----------|-------------|
 | casual | カジュアル | Youth-oriented apps only |
-| neutral (丁寧語 teineigo) | です/ます form | Consumer apps, general audience |
-| formal (尊敬語 sonkeigo) | Honorific | B2B SaaS, e-commerce, corporate |
-| very_formal (謙譲語 kenjogo) | Humble | Government, banking, luxury hospitality |
+| neutral | です/ます (desu/masu polite) | Consumer apps, general audience |
+| formal | ビジネス敬語 (business keigo) | B2B SaaS, e-commerce, corporate |
+| very_formal | 最上級敬語 (highest keigo) | Government, banking, luxury hospitality |
 
 ## Context → Level Mapping
 | Context | Keigo Level |
@@ -639,13 +682,13 @@ server.resource(
 | H2 | 35px | 22px | 700 | 1.6 |
 | H3 | 20px | 16px | 700 | 1.7 |
 | Body | 16px | 16px | 400 | 1.8 |
-| Caption | 14px | 13px | 400 | 1.6 |
+| Caption | 14px | 14px | 400 | 1.6 |
 
 ## Critical Rules
 - **No italics**: Japanese has no italic form. Use bold/color/size for emphasis.
 - **Line-height 1.8+**: Kanji density requires more vertical space than Latin text.
 - **16px body minimum**: Kanji readability breaks below 14px.
-- **word-break: keep-all**: Enables kinsoku shori (never start a line with punctuation).
+- **word-break: keep-all + line-break: strict**: Enables kinsoku shori (never start a line with punctuation). Use both properties together for correct line breaking.
 - **font-feature-settings: "palt"**: Proportional alternates for better punctuation spacing.
 - **No text-align: justify**: Browsers lack print-quality CJK justification.`,
       },
@@ -684,6 +727,7 @@ server.resource(
 | バレンタイン Valentine's | Feb 14 | Women give chocolate to men |
 | 花見 Cherry Blossom | Late Mar-Apr | Sakura dominates all design |
 | ゴールデンウィーク | Apr 29-May 5 | DO NOT LAUNCH |
+| 七夕 Tanabata | Jul 7 | Star festival, bamboo and wish tags |
 | お中元 Mid-year Gifts | July | Major ecommerce event |
 | お盆 Obon | Aug 13-16 | Businesses closed, travel peak |
 | ハロウィン Halloween | Oct 31 | Growing, kawaii horror |
@@ -708,12 +752,12 @@ server.resource(
         mimeType: "text/markdown",
         text: `# Japanese Trust & Legal Checklist
 
-## Trust Signals (Japan scores 89 on Uncertainty Avoidance)
+## Trust Signals (Japan scores 92 on Uncertainty Avoidance)
 
 ### Company Info (会社概要) - REQUIRED
 - [ ] Registered address (本店所在地)
 - [ ] Founding year (設立年) in Japanese era + Western
-- [ ] Capital amount (資本金) - minimum 500万円 to look credible
+- [ ] Capital amount (資本金) - no legal minimum since 2006, but 500万円+ looks credible
 - [ ] CEO/director names (代表者名) - users Google this
 - [ ] Employee count
 - [ ] Main banks (取引銀行)
