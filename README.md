@@ -333,6 +333,24 @@ All data ships with the package. No external APIs, no keys, no network calls.
 
 Claude Code、Cursor、Windsurf など MCP 対応クライアントで動作します。ローカル動作、APIキー不要。
 
+## Disclaimer
+
+This server returns guidance, style rules, and cultural context for building Japanese-facing products. It does not call any brand's API or act on a brand's behalf. Company and service names that appear in examples or recommendations (banks, mobile carriers, payment services, delivery companies, etc.) are referenced as cultural context for users in Japan, not as endorsements or affiliations. All trademarks belong to their respective owners.
+
 ## License
 
 [MIT](LICENSE)
+
+---
+
+## More MCPs
+
+| MCP | What it does |
+|-----|-------------|
+| [rippr](https://github.com/mrslbt/rippr) | YouTube transcript ripper for humans and AI agents |
+| [Rakuten](https://github.com/mrslbt/rakuten-mcp) | Search Rakuten's marketplace, books, and hotels |
+| [Xendit](https://github.com/mrslbt/xendit-mcp) | Xendit payment APIs: invoices, disbursements, balances |
+
+---
+
+Built by [Marsel Bait](https://github.com/mrslbt) in Tokyo

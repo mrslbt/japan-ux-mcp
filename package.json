@@ -1,6 +1,6 @@
 {
   "name": "japan-ux-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "MCP for building Japan-native websites with AI.",
   "mcpName": "io.github.mrslbt/japan-ux",
   "main": "dist/index.js",
