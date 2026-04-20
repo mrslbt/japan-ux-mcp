@@ -17,7 +17,7 @@ import { designDirectionForJapan } from "./tools/design-direction-for-japan.js";
 
 const server = new McpServer({
   name: "japan-ux-mcp",
-  version: "1.0.0",
+  version: "1.0.3",
 });
 
 // ─── Tool: generate_jp_form ─────────────────────────────────────────────────
