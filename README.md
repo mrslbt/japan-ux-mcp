@@ -1,7 +1,10 @@
 # japan-ux-mcp
 
+[![npm version](https://img.shields.io/npm/v/japan-ux-mcp.svg)](https://www.npmjs.com/package/japan-ux-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/japan-ux-mcp.svg)](https://www.npmjs.com/package/japan-ux-mcp)
 [![MCP Badge](https://lobehub.com/badge/mcp-full/mrslbt-japan-ux-mcp?theme=light)](https://lobehub.com/mcp/mrslbt-japan-ux-mcp)
 [![japan-ux-mcp MCP server](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp/badges/card.svg)](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Model Context Protocol server for Japanese web UX conventions. Generates and audits forms, typography, layout, trust signals, legal requirements, keigo, and seasonal design.
 
