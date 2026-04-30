@@ -336,10 +336,6 @@ All data ships with the package. No external APIs, no keys, no network calls.
 
 Claude Code、Cursor、Windsurf など MCP 対応クライアントで動作します。ローカル動作、APIキー不要。
 
-## Need a custom MCP?
-
-I build production MCP servers and AI-native tooling for teams. If you'd like one tailored to your stack, reach out: [marselbait.me](https://marselbait.me) · marselbait@gmail.com.
-
 ## Disclaimer
 
 This server returns guidance, style rules, and cultural context for building Japanese-facing products. It does not call any brand's API or act on a brand's behalf. Company and service names that appear in examples or recommendations (banks, mobile carriers, payment services, delivery companies, etc.) are referenced as cultural context for users in Japan, not as endorsements or affiliations. All trademarks belong to their respective owners.
