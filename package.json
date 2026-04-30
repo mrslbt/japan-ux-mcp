@@ -27,14 +27,21 @@
     "claude",
     "cursor"
   ],
-  "author": "Marsel Bait",
+  "author": {
+    "name": "Marsel Bait",
+    "url": "https://marselbait.me"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
+  "homepage": "https://github.com/mrslbt/japan-ux-mcp#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/mrslbt/japan-ux-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mrslbt/japan-ux-mcp/issues"
   },
   "type": "module",
   "files": [
