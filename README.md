@@ -137,6 +137,7 @@ Point the client config at the built entry:
 
 | Tool | Description |
 |---|---|
+| `review_jp_ui` | **Flagship enforcer** — scores CSS/markup against the Japanese UI standard (typography, colour, font payload) with JLReq/JIS citations and fixes. |
 | `generate_jp_form` | Outputs Japanese form markup: 姓/名 order, furigana, 〒 postal auto-fill, 3-field phone, 年月日 dates. |
 | `validate_jp_form` | Scores a form against JP conventions (0-100) with issues, severity, and code fixes. |
 | `generate_jp_placeholder` | Returns test data: names in kanji/katakana/romaji, real postal codes, formatted phone numbers, era dates. |

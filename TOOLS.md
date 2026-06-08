@@ -10,6 +10,7 @@ If you are looking for ideas or future directions, keep those in `PRD.md`. This 
 
 | Tool | Use it when | Returns |
 |------|-------------|---------|
+| `review_jp_ui` | You want to check any UI (incl. Western-built) against the Japanese UI standard | Verdict (pass/needs_work/fail), score, findings with JLReq/JIS citations and fixes |
 | `generate_jp_form` | You need a Japanese form from scratch | Form markup plus notes on the conventions applied |
 | `validate_jp_form` | You already have a form and want a convention check | Score, issues, and passed items |
 | `generate_jp_placeholder` | You need realistic Japanese test data | Names, addresses, phone numbers, companies, dates |
@@ -20,6 +21,25 @@ If you are looking for ideas or future directions, keep those in `PRD.md`. This 
 | `get_seasonal_context` | You want the current Japanese seasonal design context | Season, events, microseason, design recommendations, warnings |
 | `audit_japan_ux` | You want a broader Japanese UX audit beyond forms | Letter grade, category scores, findings, top fixes |
 | `design_direction_for_japan` | You want a practical visual direction for a Japanese site | Density, palette, typography, imagery, CTAs, trust layout |
+
+---
+
+## `review_jp_ui`
+
+The flagship front-end correctness enforcer. Run it on any UI — including Western-built — to check it against the Japanese UI standard before shipping to Japan.
+
+Use it when:
+- You want a pass / needs_work / fail verdict on real CSS/markup
+- You want violations with fixes, each labelled **spec** (W3C JLReq / JIS X 4051) or **convention** (documented Japanese web practice)
+
+Key inputs:
+- `css`: the stylesheet to review (required)
+- `markup`: optional HTML/JSX for context (e.g. text-on-photo detection)
+- `context`: `corporate | editorial | casual | luxury` (for the recommended font stack)
+
+Returns:
+- `verdict`, `score`, and `findings` across typography, colour, and font performance — each with severity, fix, and source citation
+- A clean Western stylesheet typically scores ~39/100 (fail)
 
 ---
 
