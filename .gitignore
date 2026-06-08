@@ -3,3 +3,6 @@ dist/
 *.tsbuildinfo
 .DS_Store
 yt-ripped/
+
+# mcp-publisher auth tokens — never commit
+.mcpregistry_*_token
