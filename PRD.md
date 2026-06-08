@@ -49,7 +49,6 @@ No existing MCP server addresses this. The gap is total.
 - Uses this daily when building Japanese sites with AI assistance
 - Portfolio piece demonstrating design expertise + technical ability + cultural fluency
 
-
 ---
 
 ## Competitive landscape

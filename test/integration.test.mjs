@@ -4,6 +4,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const EXPECTED_TOOLS = [
+  "review_jp_ui",
   "generate_jp_form",
   "validate_jp_form",
   "generate_jp_placeholder",
@@ -33,11 +34,31 @@ async function withClient(fn) {
   }
 }
 
-test("MCP server connects and lists all 10 tools", async () => {
+test("MCP server connects and lists all 11 tools", async () => {
   await withClient(async (client) => {
     const tools = await client.listTools();
     const names = tools.tools.map((t) => t.name).sort();
     assert.deepEqual(names, [...EXPECTED_TOOLS].sort());
+  });
+});
+
+test("MCP: review_jp_ui fails a Western stylesheet and cites JLReq", async () => {
+  await withClient(async (client) => {
+    const result = await client.callTool({
+      name: "review_jp_ui",
+      arguments: {
+        css: "body { font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.4; } .p { word-break: break-all; }",
+        context: "corporate",
+      },
+    });
+    assert.ok(!result.isError, "tool should not error");
+    const parsed = JSON.parse(result.content.map((c) => c.text).join("\n"));
+    assert.equal(parsed.verdict, "fail", "Western stylesheet should fail the Japanese UI standard");
+    assert.ok(parsed.score < 60, "score should be low");
+    assert.ok(
+      parsed.findings.some((f) => f.basis === "spec" && /JLReq/.test(f.source)),
+      "at least one finding should cite W3C JLReq as spec"
+    );
   });
 });
 

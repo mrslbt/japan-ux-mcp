@@ -6,9 +6,11 @@
 [![japan-ux-mcp MCP server](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp/badges/card.svg)](https://glama.ai/mcp/servers/mrslbt/japan-ux-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Model Context Protocol server for Japanese web UX conventions. Generates and audits forms, typography, layout, trust signals, legal requirements, keigo, and seasonal design.
+**Japan Design — UI + UX correctness for AI coding agents.** A front-end *enforcer*: point it at real CSS/markup and it scores your UI against the Japanese standard — typography (kinsoku, line-height, fonts), colour symbolism, font performance — with **W3C JLReq / JIS X 4051 citations** and fixes. Plus the full UX layer: forms (姓名/furigana), keigo, trust signals, legal, and seasonal design.
 
-Ten tools, ten prompts, nine resources. Runs locally, no API keys.
+Lead tool: **`review_jp_ui`** — the front-end correctness enforcer (run it on any UI, including Western-built, before shipping to Japan).
+
+Eleven tools, ten prompts, nine resources. Runs locally, no API keys. Findings are labelled **spec** (JLReq/JIS) vs **convention** (documented JP web practice) so authority is never overstated.
 
 ## Install
 

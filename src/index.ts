@@ -14,17 +14,58 @@ import { checkJpTypography } from "./tools/check-jp-typography.js";
 import { getSeasonalContext } from "./tools/get-seasonal-context.js";
 import { auditJapanUx } from "./tools/audit-japan-ux.js";
 import { designDirectionForJapan } from "./tools/design-direction-for-japan.js";
+import { reviewJpUi } from "./tools/review-jp-ui.js";
+import { READONLY, withTitles } from "./meta.js";
 
-const server = new McpServer({
-  name: "japan-ux-mcp",
-  version: "1.0.3",
-});
+const server = new McpServer(
+  {
+    name: "japan-ux-mcp",
+    version: "2.0.0",
+  },
+  {
+    instructions: `Japan Design — UI + UX correctness for AI coding agents. Generates and enforces Japanese front-end (typography, colour, layout) and UX (forms, keigo, trust, seasonal) conventions on real CSS/markup. Runs locally, no API keys.
+
+Tool guide:
+- review_jp_ui — the front-end correctness enforcer. Run it on any UI (including Western-built) to score CSS/markup against the Japanese UI standard (kinsoku, line-height, fonts, colour, font payload) with JLReq/JIS citations and fixes. Start here for "is this UI correct for Japan?".
+- check_jp_typography — typography-only deep check (subset of review_jp_ui).
+- audit_japan_ux — broad 7-category UX audit (layout, trust, navigation, content, mobile + type/visual).
+- transform_for_japan — auto-applies form/copy fixes (姓名/furigana/phone/keigo) to Western markup.
+- generate_jp_form / validate_jp_form — spec-correct Japanese forms.
+- suggest_keigo_level — correct politeness level for UI text.
+- design_direction_for_japan — a Japan visual brief from brand/audience/industry.
+- get_seasonal_context — seasonal colours, events, launch-blackout dates.
+
+HONESTY: findings labelled "spec" cite W3C JLReq / JIS X 4051; "convention" findings cite documented Japanese web practice. Never present a convention as a hard spec. All tools are read-only and deterministic.`,
+  }
+);
+
+// ─── Tool: review_jp_ui (flagship — front-end correctness enforcer) ─────────
+server.tool(
+  "review_jp_ui",
+  "Review CSS/markup against the Japanese UI standard (typography, colour, font performance) and return a pass/needs_work/fail verdict with violations, JLReq/JIS citations, and fixes. The front-end correctness enforcer — run on any UI (including Western-built) before shipping to Japan; call transform_for_japan to auto-apply form/copy fixes.",
+  withTitles({
+    css: z.string().describe("CSS content to review against the Japanese UI standard."),
+    markup: z.string().optional().describe("Optional HTML/JSX markup for context (e.g. text-on-photo detection)."),
+    context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for the recommended font stack."),
+  }),
+  READONLY,
+  async (params) => {
+    const result = reviewJpUi({
+      css: params.css,
+      markup: params.markup,
+      context: params.context,
+    });
+    return {
+      content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+    };
+  }
+);
 
 // ─── Tool: generate_jp_form ─────────────────────────────────────────────────
 server.tool(
   "generate_jp_form",
   "Generate culturally correct Japanese form markup with proper field order (姓→名), furigana, 3-field phone, 〒 postal address, 年月日 dates, and context-appropriate keigo. Use this when building any form for a Japanese audience.",
-  {
+  withTitles({
     type: z.enum(["registration", "contact", "checkout", "inquiry", "login"]).describe("Type of form to generate"),
     context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo politeness level"),
     fields: z.array(z.enum(["name", "email", "phone", "address", "date_of_birth", "company"])).describe("Fields to include in the form"),
@@ -32,7 +73,8 @@ server.tool(
     include_validation: z.boolean().default(true).describe("Include validation patterns"),
     include_labels: z.boolean().default(true).describe("Include field labels"),
     language: z.enum(["ja", "en", "bilingual"]).default("ja").describe("Label language"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = generateJpForm({
       type: params.type,
@@ -56,10 +98,11 @@ server.tool(
 server.tool(
   "validate_jp_form",
   "Audit an existing form against Japanese UX conventions. Checks for: name field order (姓/名), furigana, 3-field phone, postal code auto-fill, keigo-appropriate button text, full-width character handling. Returns score (0-100), issues with fixes, and what passed.",
-  {
+  withTitles({
     form_markup: z.string().describe("HTML/JSX form markup to audit"),
     context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context for keigo expectations"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = validateJpForm({
       form_markup: params.form_markup,
@@ -75,12 +118,13 @@ server.tool(
 server.tool(
   "generate_jp_placeholder",
   "Generate realistic Japanese test data for prototypes and development. Returns names (kanji + katakana furigana + romaji), addresses (real postal codes and prefectures), phone numbers (correct 3-field format), company names, and dates (both Gregorian and Japanese era format like 平成4年3月15日).",
-  {
+  withTitles({
     count: z.number().min(1).max(50).default(5).describe("Number of records to generate"),
     fields: z.array(z.enum(["name", "email", "phone", "address", "company", "date_of_birth"])).describe("Data fields to include"),
     gender: z.enum(["mixed", "male", "female"]).default("mixed").describe("Gender for name generation"),
     age_range: z.string().optional().describe('Age range like "20-40" for date_of_birth generation'),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = generateJpPlaceholder({
       count: params.count,
@@ -98,12 +142,13 @@ server.tool(
 server.tool(
   "suggest_keigo_level",
   "Suggest appropriately polite Japanese UI text based on context. Maps business context to keigo level (casual → very_formal) and returns the right Japanese translation for buttons, error messages, empty states, confirmations, and more. Includes alternatives for different formality levels.",
-  {
+  withTitles({
     text: z.string().describe("English UI text to translate (e.g. 'Invalid email address', 'Submit', 'No results found')"),
     ui_element: z.enum(["error_message", "button", "label", "tooltip", "empty_state", "confirmation", "onboarding", "notification", "success_message"]).describe("Type of UI element"),
     context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate", "banking", "youth_app", "luxury_hospitality"]).describe("Business context — determines keigo level"),
     tone: z.enum(["formal", "neutral", "friendly"]).optional().describe("Optional tone override"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = suggestKeigoLevel({
       text: params.text,
@@ -121,12 +166,13 @@ server.tool(
 server.tool(
   "score_japan_readiness",
   "Score any page or component for Japan-readiness on a 0-100 scale. Analyzes 5 categories: forms (name order, furigana, phone, postal), copy (keigo, Japanese text, placeholders), trust (特定商取引法, phone number, company info), typography (font, size, line-height), and cultural (seasonal awareness, imagery). Returns breakdown with issues and quick wins per category.",
-  {
+  withTitles({
     markup: z.string().describe("HTML/JSX markup to analyze"),
     description: z.string().optional().describe("Description of the page/component for additional context"),
     context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context"),
     include_suggestions: z.boolean().default(true).describe("Include priority fix suggestions with impact estimates"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = scoreJapanReadiness({
       markup: params.markup,
@@ -144,12 +190,13 @@ server.tool(
 server.tool(
   "transform_for_japan",
   "Transform Western markup into Japan-ready markup. Automatically fixes: name field order (firstName/lastName → 姓/名), adds furigana, splits phone into 3 fields, restructures address to 〒 postal format, translates buttons with appropriate keigo, replaces Western placeholder data with Japanese examples. Shows before/after scores and explains every change.",
-  {
+  withTitles({
     markup: z.string().describe("Western HTML/JSX markup to transform"),
     context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo level and conventions"),
     format: z.enum(["html", "jsx", "tsx"]).default("html").describe("Output format"),
     preserve_styling: z.boolean().default(true).describe("Preserve existing CSS classes and styles"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = transformForJapan({
       markup: params.markup,
@@ -182,11 +229,12 @@ server.tool(
 server.tool(
   "check_jp_typography",
   "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.8+ for Japanese), font sizes (14px minimum for kanji), word-break: keep-all (kinsoku shori), text-on-photo overlays, font-feature-settings 'palt', and more. Returns score, issues, and a recommended font stack for your context.",
-  {
+  withTitles({
     css: z.string().describe("CSS content to audit for Japanese typography issues"),
     markup: z.string().optional().describe("Optional HTML/JSX markup for additional context (background images, text-on-photo detection)"),
     context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for font stack recommendation"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = checkJpTypography({
       css: params.css,
@@ -203,10 +251,11 @@ server.tool(
 server.tool(
   "get_seasonal_context",
   "Get the current Japanese seasonal context for design decisions. Returns: current season with traditional colors, active events (正月, 花見, お盆, etc.), upcoming events, the current microseason (二十四節気), recommended design colors, and warnings (e.g., do not launch during Golden Week). Covers all 24 Japanese microseasons and 24+ major events.",
-  {
+  withTitles({
     month: z.number().min(1).max(12).describe("Month (1-12)"),
     day: z.number().min(1).max(31).optional().describe("Day of month (defaults to 15)"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = getSeasonalContext({
       month: params.month,
@@ -222,13 +271,14 @@ server.tool(
 server.tool(
   "audit_japan_ux",
   "Comprehensive Japanese UX audit covering 7 categories: layout (density, breadcrumbs, CTA placement), typography (fonts, line-height, kinsoku shori), visual (color meanings, red-name taboo, dark theme), navigation (phone number, footer links, hamburger rules), trust (会社概要, case studies, proof numbers, legal links), content (Japanese text, FAQ, pricing tables), and mobile (viewport, tel: links, touch targets). Returns letter grade (A-F), category scores, and prioritized fixes.",
-  {
+  withTitles({
     markup: z.string().describe("HTML/JSX markup to audit"),
     css: z.string().optional().describe("CSS content for typography and visual checks"),
     url_description: z.string().optional().describe("Description of the page for additional context"),
     site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).describe("Type of site being audited"),
     target_audience: z.string().optional().describe("Target audience description"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = auditJapanUx({
       markup: params.markup,
@@ -247,11 +297,12 @@ server.tool(
 server.tool(
   "design_direction_for_japan",
   "Generate a Japan-specific visual direction for a website or interface. Takes a loose brand type, audience, and industry, then returns a practical design brief covering visual direction, information density, color palette, typography, imagery style, CTA style, trust layout, and section priorities.",
-  {
+  withTitles({
     brand_type: z.string().describe("Brand expression such as 'modern minimal', 'premium', 'friendly', 'traditional craft'"),
     audience: z.string().describe("Target audience such as 'business buyers', 'families', 'seniors', 'domestic travelers'"),
     industry: z.string().describe("Industry or site type such as 'B2B SaaS', 'clinic', 'luxury ryokan', 'ecommerce', 'corporate'"),
-  },
+  }),
+  READONLY,
   async (params) => {
     const result = designDirectionForJapan({
       brand_type: params.brand_type,
