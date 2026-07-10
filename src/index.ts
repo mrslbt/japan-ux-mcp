@@ -20,7 +20,7 @@ import { READONLY, withTitles } from "./meta.js";
 const server = new McpServer(
   {
     name: "japan-ux-mcp",
-    version: "2.0.0",
+    version: "2.0.1",
   },
   {
     instructions: `Japan Design — UI + UX correctness for AI coding agents. Generates and enforces Japanese front-end (typography, colour, layout) and UX (forms, keigo, trust, seasonal) conventions on real CSS/markup. Runs locally, no API keys.
@@ -40,15 +40,18 @@ HONESTY: findings labelled "spec" cite W3C JLReq / JIS X 4051; "convention" find
 );
 
 // ─── Tool: review_jp_ui (flagship — front-end correctness enforcer) ─────────
-server.tool(
+server.registerTool(
   "review_jp_ui",
-  "Review CSS/markup against the Japanese UI standard (typography, colour, font performance) and return a pass/needs_work/fail verdict with violations, JLReq/JIS citations, and fixes. The front-end correctness enforcer — run on any UI (including Western-built) before shipping to Japan; call transform_for_japan to auto-apply form/copy fixes.",
-  withTitles({
-    css: z.string().describe("CSS content to review against the Japanese UI standard."),
-    markup: z.string().optional().describe("Optional HTML/JSX markup for context (e.g. text-on-photo detection)."),
-    context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for the recommended font stack."),
-  }),
-  READONLY,
+  {
+    title: "Review JP UI",
+    description: "Review CSS/markup against the Japanese UI standard (typography, colour, font performance) and return a pass/needs_work/fail verdict with violations, JLReq/JIS citations, and fixes. The front-end correctness enforcer — run on any UI (including Western-built) before shipping to Japan; call transform_for_japan to auto-apply form/copy fixes.",
+    inputSchema: withTitles({
+      css: z.string().describe("CSS content to review against the Japanese UI standard."),
+      markup: z.string().optional().describe("Optional HTML/JSX markup for context (e.g. text-on-photo detection)."),
+      context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for the recommended font stack."),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = reviewJpUi({
       css: params.css,
@@ -62,19 +65,22 @@ server.tool(
 );
 
 // ─── Tool: generate_jp_form ─────────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "generate_jp_form",
-  "Generate culturally correct Japanese form markup with proper field order (姓→名), furigana, 3-field phone, 〒 postal address, 年月日 dates, and context-appropriate keigo. Use this when building any form for a Japanese audience.",
-  withTitles({
-    type: z.enum(["registration", "contact", "checkout", "inquiry", "login"]).describe("Type of form to generate"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo politeness level"),
-    fields: z.array(z.enum(["name", "email", "phone", "address", "date_of_birth", "company"])).describe("Fields to include in the form"),
-    format: z.enum(["html", "jsx", "tsx"]).default("html").describe("Output format"),
-    include_validation: z.boolean().default(true).describe("Include validation patterns"),
-    include_labels: z.boolean().default(true).describe("Include field labels"),
-    language: z.enum(["ja", "en", "bilingual"]).default("ja").describe("Label language"),
-  }),
-  READONLY,
+  {
+    title: "Generate JP Form",
+    description: "Generate culturally correct Japanese form markup with proper field order (姓→名), furigana, 3-field phone, 〒 postal address, 年月日 dates, and context-appropriate keigo. Use this when building any form for a Japanese audience.",
+    inputSchema: withTitles({
+      type: z.enum(["registration", "contact", "checkout", "inquiry", "login"]).describe("Type of form to generate"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo politeness level"),
+      fields: z.array(z.enum(["name", "email", "phone", "address", "date_of_birth", "company"])).describe("Fields to include in the form"),
+      format: z.enum(["html", "jsx", "tsx"]).default("html").describe("Output format"),
+      include_validation: z.boolean().default(true).describe("Include validation patterns"),
+      include_labels: z.boolean().default(true).describe("Include field labels"),
+      language: z.enum(["ja", "en", "bilingual"]).default("ja").describe("Label language"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = generateJpForm({
       type: params.type,
@@ -95,14 +101,17 @@ server.tool(
 );
 
 // ─── Tool: validate_jp_form ─────────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "validate_jp_form",
-  "Audit an existing form against Japanese UX conventions. Checks for: name field order (姓/名), furigana, 3-field phone, postal code auto-fill, keigo-appropriate button text, full-width character handling. Returns score (0-100), issues with fixes, and what passed.",
-  withTitles({
-    form_markup: z.string().describe("HTML/JSX form markup to audit"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context for keigo expectations"),
-  }),
-  READONLY,
+  {
+    title: "Validate JP Form",
+    description: "Audit an existing form against Japanese UX conventions. Checks for: name field order (姓/名), furigana, 3-field phone, postal code auto-fill, keigo-appropriate button text, full-width character handling. Returns score (0-100), issues with fixes, and what passed.",
+    inputSchema: withTitles({
+      form_markup: z.string().describe("HTML/JSX form markup to audit"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context for keigo expectations"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = validateJpForm({
       form_markup: params.form_markup,
@@ -115,16 +124,19 @@ server.tool(
 );
 
 // ─── Tool: generate_jp_placeholder ──────────────────────────────────────────
-server.tool(
+server.registerTool(
   "generate_jp_placeholder",
-  "Generate realistic Japanese test data for prototypes and development. Returns names (kanji + katakana furigana + romaji), addresses (real postal codes and prefectures), phone numbers (correct 3-field format), company names, and dates (both Gregorian and Japanese era format like 平成4年3月15日).",
-  withTitles({
-    count: z.number().min(1).max(50).default(5).describe("Number of records to generate"),
-    fields: z.array(z.enum(["name", "email", "phone", "address", "company", "date_of_birth"])).describe("Data fields to include"),
-    gender: z.enum(["mixed", "male", "female"]).default("mixed").describe("Gender for name generation"),
-    age_range: z.string().optional().describe('Age range like "20-40" for date_of_birth generation'),
-  }),
-  READONLY,
+  {
+    title: "Generate JP Placeholder Data",
+    description: "Generate realistic Japanese test data for prototypes and development. Returns names (kanji + katakana furigana + romaji), addresses (real postal codes and prefectures), phone numbers (correct 3-field format), company names, and dates (both Gregorian and Japanese era format like 平成4年3月15日).",
+    inputSchema: withTitles({
+      count: z.number().min(1).max(50).default(5).describe("Number of records to generate"),
+      fields: z.array(z.enum(["name", "email", "phone", "address", "company", "date_of_birth"])).describe("Data fields to include"),
+      gender: z.enum(["mixed", "male", "female"]).default("mixed").describe("Gender for name generation"),
+      age_range: z.string().optional().describe('Age range like "20-40" for date_of_birth generation'),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = generateJpPlaceholder({
       count: params.count,
@@ -139,16 +151,19 @@ server.tool(
 );
 
 // ─── Tool: suggest_keigo_level ──────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "suggest_keigo_level",
-  "Suggest appropriately polite Japanese UI text based on context. Maps business context to keigo level (casual → very_formal) and returns the right Japanese translation for buttons, error messages, empty states, confirmations, and more. Includes alternatives for different formality levels.",
-  withTitles({
-    text: z.string().describe("English UI text to translate (e.g. 'Invalid email address', 'Submit', 'No results found')"),
-    ui_element: z.enum(["error_message", "button", "label", "tooltip", "empty_state", "confirmation", "onboarding", "notification", "success_message"]).describe("Type of UI element"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate", "banking", "youth_app", "luxury_hospitality"]).describe("Business context — determines keigo level"),
-    tone: z.enum(["formal", "neutral", "friendly"]).optional().describe("Optional tone override"),
-  }),
-  READONLY,
+  {
+    title: "Suggest Keigo Level",
+    description: "Suggest appropriately polite Japanese UI text based on context. Maps business context to keigo level (casual → very_formal) and returns the right Japanese translation for buttons, error messages, empty states, confirmations, and more. Includes alternatives for different formality levels.",
+    inputSchema: withTitles({
+      text: z.string().describe("English UI text to translate (e.g. 'Invalid email address', 'Submit', 'No results found')"),
+      ui_element: z.enum(["error_message", "button", "label", "tooltip", "empty_state", "confirmation", "onboarding", "notification", "success_message"]).describe("Type of UI element"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate", "banking", "youth_app", "luxury_hospitality"]).describe("Business context — determines keigo level"),
+      tone: z.enum(["formal", "neutral", "friendly"]).optional().describe("Optional tone override"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = suggestKeigoLevel({
       text: params.text,
@@ -163,16 +178,19 @@ server.tool(
 );
 
 // ─── Tool: score_japan_readiness ────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "score_japan_readiness",
-  "Score any page or component for Japan-readiness on a 0-100 scale. Analyzes 5 categories: forms (name order, furigana, phone, postal), copy (keigo, Japanese text, placeholders), trust (特定商取引法, phone number, company info), typography (font, size, line-height), and cultural (seasonal awareness, imagery). Returns breakdown with issues and quick wins per category.",
-  withTitles({
-    markup: z.string().describe("HTML/JSX markup to analyze"),
-    description: z.string().optional().describe("Description of the page/component for additional context"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context"),
-    include_suggestions: z.boolean().default(true).describe("Include priority fix suggestions with impact estimates"),
-  }),
-  READONLY,
+  {
+    title: "Score Japan Readiness",
+    description: "Score any page or component for Japan-readiness on a 0-100 scale. Analyzes 5 categories: forms (name order, furigana, phone, postal), copy (keigo, Japanese text, placeholders), trust (特定商取引法, phone number, company info), typography (font, size, line-height), and cultural (seasonal awareness, imagery). Returns breakdown with issues and quick wins per category.",
+    inputSchema: withTitles({
+      markup: z.string().describe("HTML/JSX markup to analyze"),
+      description: z.string().optional().describe("Description of the page/component for additional context"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context"),
+      include_suggestions: z.boolean().default(true).describe("Include priority fix suggestions with impact estimates"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = scoreJapanReadiness({
       markup: params.markup,
@@ -187,16 +205,19 @@ server.tool(
 );
 
 // ─── Tool: transform_for_japan ──────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "transform_for_japan",
-  "Transform Western markup into Japan-ready markup. Automatically fixes: name field order (firstName/lastName → 姓/名), adds furigana, splits phone into 3 fields, restructures address to 〒 postal format, translates buttons with appropriate keigo, replaces Western placeholder data with Japanese examples. Shows before/after scores and explains every change.",
-  withTitles({
-    markup: z.string().describe("Western HTML/JSX markup to transform"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo level and conventions"),
-    format: z.enum(["html", "jsx", "tsx"]).default("html").describe("Output format"),
-    preserve_styling: z.boolean().default(true).describe("Preserve existing CSS classes and styles"),
-  }),
-  READONLY,
+  {
+    title: "Transform for Japan",
+    description: "Transform Western markup into Japan-ready markup. Automatically fixes: name field order (firstName/lastName → 姓/名), adds furigana, splits phone into 3 fields, restructures address to 〒 postal format, translates buttons with appropriate keigo, replaces Western placeholder data with Japanese examples. Shows before/after scores and explains every change.",
+    inputSchema: withTitles({
+      markup: z.string().describe("Western HTML/JSX markup to transform"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context — determines keigo level and conventions"),
+      format: z.enum(["html", "jsx", "tsx"]).default("html").describe("Output format"),
+      preserve_styling: z.boolean().default(true).describe("Preserve existing CSS classes and styles"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = transformForJapan({
       markup: params.markup,
@@ -226,15 +247,18 @@ server.tool(
 );
 
 // ─── Tool: check_jp_typography ─────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "check_jp_typography",
-  "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.8+ for Japanese), font sizes (14px minimum for kanji), word-break: keep-all (kinsoku shori), text-on-photo overlays, font-feature-settings 'palt', and more. Returns score, issues, and a recommended font stack for your context.",
-  withTitles({
-    css: z.string().describe("CSS content to audit for Japanese typography issues"),
-    markup: z.string().optional().describe("Optional HTML/JSX markup for additional context (background images, text-on-photo detection)"),
-    context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for font stack recommendation"),
-  }),
-  READONLY,
+  {
+    title: "Check JP Typography",
+    description: "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.8+ for Japanese), font sizes (14px minimum for kanji), word-break: keep-all (kinsoku shori), text-on-photo overlays, font-feature-settings 'palt', and more. Returns score, issues, and a recommended font stack for your context.",
+    inputSchema: withTitles({
+      css: z.string().describe("CSS content to audit for Japanese typography issues"),
+      markup: z.string().optional().describe("Optional HTML/JSX markup for additional context (background images, text-on-photo detection)"),
+      context: z.enum(["corporate", "editorial", "casual", "luxury"]).optional().describe("Design context for font stack recommendation"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = checkJpTypography({
       css: params.css,
@@ -248,14 +272,17 @@ server.tool(
 );
 
 // ─── Tool: get_seasonal_context ───────────────────────────────────────────
-server.tool(
+server.registerTool(
   "get_seasonal_context",
-  "Get the current Japanese seasonal context for design decisions. Returns: current season with traditional colors, active events (正月, 花見, お盆, etc.), upcoming events, the current microseason (二十四節気), recommended design colors, and warnings (e.g., do not launch during Golden Week). Covers all 24 Japanese microseasons and 24+ major events.",
-  withTitles({
-    month: z.number().min(1).max(12).describe("Month (1-12)"),
-    day: z.number().min(1).max(31).optional().describe("Day of month (defaults to 15)"),
-  }),
-  READONLY,
+  {
+    title: "Get Seasonal Context",
+    description: "Get the current Japanese seasonal context for design decisions. Returns: current season with traditional colors, active events (正月, 花見, お盆, etc.), upcoming events, the current microseason (二十四節気), recommended design colors, and warnings (e.g., do not launch during Golden Week). Covers all 24 Japanese microseasons and 24+ major events.",
+    inputSchema: withTitles({
+      month: z.number().min(1).max(12).describe("Month (1-12)"),
+      day: z.number().min(1).max(31).optional().describe("Day of month (defaults to 15)"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = getSeasonalContext({
       month: params.month,
@@ -268,17 +295,20 @@ server.tool(
 );
 
 // ─── Tool: audit_japan_ux ─────────────────────────────────────────────────
-server.tool(
+server.registerTool(
   "audit_japan_ux",
-  "Comprehensive Japanese UX audit covering 7 categories: layout (density, breadcrumbs, CTA placement), typography (fonts, line-height, kinsoku shori), visual (color meanings, red-name taboo, dark theme), navigation (phone number, footer links, hamburger rules), trust (会社概要, case studies, proof numbers, legal links), content (Japanese text, FAQ, pricing tables), and mobile (viewport, tel: links, touch targets). Returns letter grade (A-F), category scores, and prioritized fixes.",
-  withTitles({
-    markup: z.string().describe("HTML/JSX markup to audit"),
-    css: z.string().optional().describe("CSS content for typography and visual checks"),
-    url_description: z.string().optional().describe("Description of the page for additional context"),
-    site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).describe("Type of site being audited"),
-    target_audience: z.string().optional().describe("Target audience description"),
-  }),
-  READONLY,
+  {
+    title: "Audit Japan UX",
+    description: "Comprehensive Japanese UX audit covering 7 categories: layout (density, breadcrumbs, CTA placement), typography (fonts, line-height, kinsoku shori), visual (color meanings, red-name taboo, dark theme), navigation (phone number, footer links, hamburger rules), trust (会社概要, case studies, proof numbers, legal links), content (Japanese text, FAQ, pricing tables), and mobile (viewport, tel: links, touch targets). Returns letter grade (A-F), category scores, and prioritized fixes.",
+    inputSchema: withTitles({
+      markup: z.string().describe("HTML/JSX markup to audit"),
+      css: z.string().optional().describe("CSS content for typography and visual checks"),
+      url_description: z.string().optional().describe("Description of the page for additional context"),
+      site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).describe("Type of site being audited"),
+      target_audience: z.string().optional().describe("Target audience description"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = auditJapanUx({
       markup: params.markup,
@@ -294,15 +324,18 @@ server.tool(
 );
 
 // ─── Tool: design_direction_for_japan ──────────────────────────────────────
-server.tool(
+server.registerTool(
   "design_direction_for_japan",
-  "Generate a Japan-specific visual direction for a website or interface. Takes a loose brand type, audience, and industry, then returns a practical design brief covering visual direction, information density, color palette, typography, imagery style, CTA style, trust layout, and section priorities.",
-  withTitles({
-    brand_type: z.string().describe("Brand expression such as 'modern minimal', 'premium', 'friendly', 'traditional craft'"),
-    audience: z.string().describe("Target audience such as 'business buyers', 'families', 'seniors', 'domestic travelers'"),
-    industry: z.string().describe("Industry or site type such as 'B2B SaaS', 'clinic', 'luxury ryokan', 'ecommerce', 'corporate'"),
-  }),
-  READONLY,
+  {
+    title: "Design Direction for Japan",
+    description: "Generate a Japan-specific visual direction for a website or interface. Takes a loose brand type, audience, and industry, then returns a practical design brief covering visual direction, information density, color palette, typography, imagery style, CTA style, trust layout, and section priorities.",
+    inputSchema: withTitles({
+      brand_type: z.string().describe("Brand expression such as 'modern minimal', 'premium', 'friendly', 'traditional craft'"),
+      audience: z.string().describe("Target audience such as 'business buyers', 'families', 'seniors', 'domestic travelers'"),
+      industry: z.string().describe("Industry or site type such as 'B2B SaaS', 'clinic', 'luxury ryokan', 'ecommerce', 'corporate'"),
+    }),
+    annotations: READONLY,
+  },
   async (params) => {
     const result = designDirectionForJapan({
       brand_type: params.brand_type,
@@ -317,12 +350,14 @@ server.tool(
 
 // ─── MCP Prompts (show up as slash commands in Claude Code) ─────────────────
 
-server.prompt(
+server.registerPrompt(
   "japan_form",
-  "Generate a culturally correct Japanese form. Specify the type and context.",
   {
-    type: z.enum(["registration", "contact", "checkout", "inquiry", "login"]).describe("Form type"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context"),
+    description: "Generate a culturally correct Japanese form. Specify the type and context.",
+    argsSchema: {
+      type: z.enum(["registration", "contact", "checkout", "inquiry", "login"]).describe("Form type"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).describe("Business context"),
+    },
   },
   async ({ type, context }) => ({
     messages: [
@@ -337,12 +372,14 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_audit",
-  "Audit HTML/JSX markup for Japanese UX issues. Paste your form markup.",
   {
-    markup: z.string().describe("Form HTML/JSX to audit"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    description: "Audit HTML/JSX markup for Japanese UX issues. Paste your form markup.",
+    argsSchema: {
+      markup: z.string().describe("Form HTML/JSX to audit"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    },
   },
   async ({ markup, context }) => ({
     messages: [
@@ -357,12 +394,14 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_transform",
-  "Transform Western markup into Japan-ready markup with before/after scoring.",
   {
-    markup: z.string().describe("Western HTML/JSX to transform"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    description: "Transform Western markup into Japan-ready markup with before/after scoring.",
+    argsSchema: {
+      markup: z.string().describe("Western HTML/JSX to transform"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    },
   },
   async ({ markup, context }) => ({
     messages: [
@@ -377,11 +416,13 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_testdata",
-  "Generate realistic Japanese test data for prototypes.",
   {
-    count: z.string().default("5").describe("Number of records"),
+    description: "Generate realistic Japanese test data for prototypes.",
+    argsSchema: {
+      count: z.string().default("5").describe("Number of records"),
+    },
   },
   async ({ count }) => ({
     messages: [
@@ -396,13 +437,15 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_keigo",
-  "Get the right Japanese politeness level for UI text.",
   {
-    text: z.string().describe("English UI text (e.g. 'Invalid email', 'Submit', 'Are you sure?')"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate", "banking", "youth_app", "luxury_hospitality"]).default("consumer_app").describe("Business context"),
-    element: z.enum(["error_message", "button", "label", "tooltip", "empty_state", "confirmation", "onboarding", "notification", "success_message"]).default("button").describe("UI element type"),
+    description: "Get the right Japanese politeness level for UI text.",
+    argsSchema: {
+      text: z.string().describe("English UI text (e.g. 'Invalid email', 'Submit', 'Are you sure?')"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate", "banking", "youth_app", "luxury_hospitality"]).default("consumer_app").describe("Business context"),
+      element: z.enum(["error_message", "button", "label", "tooltip", "empty_state", "confirmation", "onboarding", "notification", "success_message"]).default("button").describe("UI element type"),
+    },
   },
   async ({ text, context, element }) => ({
     messages: [
@@ -417,12 +460,14 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_score",
-  "Score a page or component for Japan-readiness (0-100).",
   {
-    description: z.string().describe("Describe the page: what fields, buttons, layout, content"),
-    context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    description: "Score a page or component for Japan-readiness (0-100).",
+    argsSchema: {
+      description: z.string().describe("Describe the page: what fields, buttons, layout, content"),
+      context: z.enum(["b2b_saas", "consumer_app", "government", "ecommerce", "corporate"]).default("consumer_app").describe("Business context"),
+    },
   },
   async ({ description, context }) => ({
     messages: [
@@ -437,12 +482,14 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_typography",
-  "Check CSS for Japanese typography issues (fonts, line-height, kinsoku shori, sizing).",
   {
-    css: z.string().describe("CSS content to check"),
-    context: z.enum(["corporate", "editorial", "casual", "luxury"]).default("corporate").describe("Design context"),
+    description: "Check CSS for Japanese typography issues (fonts, line-height, kinsoku shori, sizing).",
+    argsSchema: {
+      css: z.string().describe("CSS content to check"),
+      context: z.enum(["corporate", "editorial", "casual", "luxury"]).default("corporate").describe("Design context"),
+    },
   },
   async ({ css, context }) => ({
     messages: [
@@ -457,11 +504,13 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_seasonal",
-  "Get seasonal design context for a specific month.",
   {
-    month: z.string().default("4").describe("Month number (1-12)"),
+    description: "Get seasonal design context for a specific month.",
+    argsSchema: {
+      month: z.string().default("4").describe("Month number (1-12)"),
+    },
   },
   async ({ month }) => ({
     messages: [
@@ -476,12 +525,14 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_full_audit",
-  "Run a full Japanese UX audit on a page. Covers layout, typography, visual, navigation, trust, content, and mobile.",
   {
-    site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).default("corporate").describe("Site type"),
-    description: z.string().describe("Describe the page: what it contains, who it targets, what it does"),
+    description: "Run a full Japanese UX audit on a page. Covers layout, typography, visual, navigation, trust, content, and mobile.",
+    argsSchema: {
+      site_type: z.enum(["corporate", "ecommerce", "b2b_saas", "lp", "media", "government"]).default("corporate").describe("Site type"),
+      description: z.string().describe("Describe the page: what it contains, who it targets, what it does"),
+    },
   },
   async ({ site_type, description }) => ({
     messages: [
@@ -496,13 +547,15 @@ server.prompt(
   })
 );
 
-server.prompt(
+server.registerPrompt(
   "japan_design_direction",
-  "Get a Japan-specific design direction for a site or interface.",
   {
-    brand_type: z.string().describe("Brand expression such as modern minimal, premium, friendly, or traditional"),
-    audience: z.string().describe("Target audience"),
-    industry: z.string().describe("Industry or site type"),
+    description: "Get a Japan-specific design direction for a site or interface.",
+    argsSchema: {
+      brand_type: z.string().describe("Brand expression such as modern minimal, premium, friendly, or traditional"),
+      audience: z.string().describe("Target audience"),
+      industry: z.string().describe("Industry or site type"),
+    },
   },
   async ({ brand_type, audience, industry }) => ({
     messages: [
@@ -519,7 +572,7 @@ server.prompt(
 
 // ─── MCP Resources (reference data accessible to Claude) ────────────────────
 
-server.resource(
+server.registerResource(
   "keigo-guide",
   "japan-ux://keigo-guide",
   { description: "Complete Japanese keigo (politeness) reference for UI copy — 4 levels across 8 business contexts with 30+ pattern examples", mimeType: "text/markdown" },
@@ -574,7 +627,7 @@ Japanese error messages should **guide the user to the correct action**, not jus
   })
 );
 
-server.resource(
+server.registerResource(
   "form-checklist",
   "japan-ux://form-checklist",
   { description: "Japanese form UX checklist — every convention to check before shipping a form for Japanese users", mimeType: "text/markdown" },
@@ -635,7 +688,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "phone-formats",
   "japan-ux://phone-formats",
   { description: "Japanese phone number formats — mobile, landline, toll-free, IP phone patterns with field splitting rules", mimeType: "text/markdown" },
@@ -667,7 +720,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "era-calendar",
   "japan-ux://era-calendar",
   { description: "Japanese era calendar — Reiwa, Heisei, Showa, Taisho, Meiji with date ranges and conversion rules", mimeType: "text/markdown" },
@@ -700,7 +753,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "typography-guide",
   "japan-ux://typography-guide",
   { description: "Japanese web typography reference: font stacks, sizing scale, line-height rules, kinsoku shori, and CSS suggestions", mimeType: "text/markdown" },
@@ -747,7 +800,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "seasonal-calendar",
   "japan-ux://seasonal-calendar",
   { description: "Full Japanese seasonal calendar with events, 24 microseasons (二十四節気), color palettes, and launch blackout dates", mimeType: "text/markdown" },
@@ -792,7 +845,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "trust-checklist",
   "japan-ux://trust-checklist",
   { description: "Japanese trust signals and legal requirements checklist for websites", mimeType: "text/markdown" },
@@ -852,7 +905,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "color-guide",
   "japan-ux://color-guide",
   { description: "Japanese color meanings and visual design rules for web", mimeType: "text/markdown" },
@@ -889,7 +942,7 @@ server.resource(
   })
 );
 
-server.resource(
+server.registerResource(
   "layout-guide",
   "japan-ux://layout-guide",
   { description: "Japanese web layout conventions: grid, spacing, density, responsive breakpoints", mimeType: "text/markdown" },
