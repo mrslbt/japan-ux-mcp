@@ -18,6 +18,8 @@ export interface EventInfo {
   name_en: string;
   date: string;
   month: number;
+  /** For events spanning multiple months (e.g. Golden Week Apr 29 - May 5). Overrides `month` for matching. */
+  months?: number[];
   design_impact: string;
   business_notes: string;
 }
@@ -71,7 +73,7 @@ const SEASONS: SeasonInfo[] = [
       { name_ja: "海色", name_en: "Ocean blue", hex: "#0097DB" },
       { name_ja: "向日葵色", name_en: "Sunflower yellow", hex: "#FFC20E" },
       { name_ja: "藍色", name_en: "Indigo", hex: "#264061" },
-      { name_ja: "新緑色", name_en: "Deep green", hex: "#3B7960" },
+      { name_ja: "新緑色", name_en: "Fresh young green", hex: "#A8C97F" },
     ],
   },
   {
@@ -109,7 +111,7 @@ const EVENTS: EventInfo[] = [
   { id: "white_day", name_ja: "ホワイトデー", name_en: "White Day", date: "Mar 14", month: 3, design_impact: "White, pastel. Men return gifts to women. Gift-focused campaigns.", business_notes: "Gift ecommerce peak. White-themed product promotions." },
   { id: "entrance_ceremonies", name_ja: "入学式・入社式", name_en: "School/company entrance ceremonies", date: "Early April", month: 4, design_impact: "Cherry blossoms at peak. New beginnings, fresh starts. Suits, formal wear.", business_notes: "New employee onboarding. School supply sales. Business card printing peak. April 1 is the start of the fiscal year for many companies." },
   { id: "hanami", name_ja: "花見", name_en: "Cherry blossom viewing", date: "Late Mar - mid Apr", month: 4, design_impact: "Sakura dominates all design. Pink gradients, petal animations, branch silhouettes. The most visually iconic Japanese season.", business_notes: "Seasonal product launches. Limited-edition sakura packaging. Outdoor event promotions. Cherry blossom forecasts (桜前線) drive campaign timing by region." },
-  { id: "golden_week", name_ja: "ゴールデンウィーク", name_en: "Golden Week", date: "Apr 29 - May 5", month: 5, design_impact: "Travel and leisure imagery. Bright, energetic colors.", business_notes: "DO NOT launch products or major features during GW. Many businesses closed. Travel bookings peak. Schedule deployments and campaigns before or after." },
+  { id: "golden_week", name_ja: "ゴールデンウィーク", name_en: "Golden Week", date: "Apr 29 - May 5", month: 4, months: [4, 5], design_impact: "Travel and leisure imagery. Bright, energetic colors.", business_notes: "DO NOT launch products or major features during GW. Many companies bridge the gap into a continuous holiday; Apr 30 - May 2 are working days in non-bridged years but effective activity is low. Travel bookings peak. Schedule deployments and campaigns before or after." },
   { id: "children_day", name_ja: "こどもの日", name_en: "Children's Day", date: "May 5", month: 5, design_impact: "Koinobori (carp streamers), kabuto (helmets). Blue, green, red.", business_notes: "Family-oriented promotions. Part of Golden Week." },
   { id: "mothers_day", name_ja: "母の日", name_en: "Mother's Day", date: "2nd Sunday May", month: 5, design_impact: "Carnations (red and pink). Gift-focused, warm color palettes.", business_notes: "Major gift ecommerce event. Flower delivery services peak." },
   { id: "fathers_day", name_ja: "父の日", name_en: "Father's Day", date: "3rd Sunday June", month: 6, design_impact: "Yellow roses (Japan-specific). Blue and yellow palettes.", business_notes: "Smaller than Mother's Day but growing. Gift campaigns." },
@@ -129,7 +131,7 @@ const EVENTS: EventInfo[] = [
 ];
 
 const MICROSEASONS: MicroseasonInfo[] = [
-  { id: "shoushou", name_ja: "小寒", name_en: "Minor Cold", approximate_date: "Jan 5" },
+  { id: "shoukan", name_ja: "小寒", name_en: "Minor Cold", approximate_date: "Jan 5" },
   { id: "daikan", name_ja: "大寒", name_en: "Major Cold", approximate_date: "Jan 20" },
   { id: "risshun", name_ja: "立春", name_en: "Start of Spring", approximate_date: "Feb 4" },
   { id: "usui", name_ja: "雨水", name_en: "Rain Water", approximate_date: "Feb 19" },
@@ -210,11 +212,14 @@ export function getSeasonalContext(params: SeasonalContextParams): SeasonalConte
   };
 
   // Find active events (within the current month)
-  const activeEvents = EVENTS.filter((e) => e.month === month);
+  const eventMonths = (e: EventInfo): number[] => e.months ?? [e.month];
+  const activeEvents = EVENTS.filter((e) => eventMonths(e).includes(month));
 
   // Find upcoming events (next month)
   const nextMonth = month === 12 ? 1 : month + 1;
-  const upcomingEvents = EVENTS.filter((e) => e.month === nextMonth);
+  const upcomingEvents = EVENTS.filter(
+    (e) => !eventMonths(e).includes(month) && eventMonths(e).includes(nextMonth)
+  );
 
   // Find current microseason
   const currentDOY = dayOfYear(month, day);

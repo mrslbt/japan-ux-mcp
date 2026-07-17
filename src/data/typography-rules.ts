@@ -53,18 +53,18 @@ export const TYPOGRAPHY_RULES: TypographyRule[] = [
   {
     id: "line_height_body",
     category: "line_height",
-    rule: "Line-height 1.8-2.0 for body text (200%+)",
+    rule: "Line-height 1.7-2.0 recommended for body text",
     details:
-      "Japanese body text requires significantly more line-height than English. The standard is 1.8-2.0 (180-200%). This is because kanji characters are visually denser -- each glyph fills its em square more completely than Latin letters. At line-height 1.5 (common in Western design), Japanese text feels cramped and exhausting to read. This is one of the most common mistakes non-Japanese designers make.",
-    css_suggestion: "line-height: 1.8; /* Minimum for Japanese body text, 2.0 preferred */",
+      "Japanese body text benefits from more line-height than English. The recommended range is 1.7-2.0 for body text; below 1.5 is genuinely cramped. Kanji characters are visually denser -- each glyph fills its em square more completely than Latin letters -- so the tight line-heights common in Western design read poorly in long Japanese paragraphs. This is a documented convention of Japanese web practice, not a spec requirement.",
+    css_suggestion: "line-height: 1.8; /* Recommended for Japanese body text (1.7-2.0 range) */",
   },
   {
     id: "line_height_relaxed",
     category: "line_height",
-    rule: "Line-height up to 2.4x for relaxed, editorial feel",
+    rule: "Line-height up to ~2.4x for relaxed, editorial feel",
     details:
-      "For a luxurious or editorial reading experience, Japanese text can go up to 2.4x line-height. This is common on brand sites, about pages, and long-form content where readability and atmosphere matter more than density. Magazine-style Japanese web layouts frequently use this generous spacing.",
-    css_suggestion: "line-height: 2.4; /* Editorial/luxury Japanese text */",
+      "For a luxurious or editorial reading experience, some Japanese editorial and brand sites go up to 2.4x line-height on about pages and long-form content where atmosphere matters more than density. Note that JLReq's recommended line gap tops out around 1em (roughly line-height 2.0), so anything beyond that is a deliberate stylistic choice rather than a typographic norm.",
+    css_suggestion: "line-height: 2.2; /* Editorial/luxury Japanese text; some sites go up to 2.4 */",
   },
 
   // Sizing
@@ -79,24 +79,24 @@ export const TYPOGRAPHY_RULES: TypographyRule[] = [
   {
     id: "sizing_kanji_minimum",
     category: "sizing",
-    rule: "Absolute minimum font size for kanji readability: 14px",
+    rule: "Kanji size floors: 16px recommended body, 14px body minimum, 12px captions only",
     details:
-      "14px is the absolute smallest size at which complex kanji characters remain readable on screen. This applies to captions, footnotes, and auxiliary text. Below 14px, characters like 鬱 (depression), 薔薇 (rose), or 驚 (surprise) with many strokes become illegible blobs. Accessibility-conscious Japanese sites set 14px as their hard floor.",
-    css_suggestion: "font-size: 14px; /* Absolute minimum for any Japanese text */",
+      "16px is the recommended floor for Japanese body text, and 14px is the minimum for body text. 12px is acceptable only for captions, footnotes, and legal fine print -- the exception this package's own TYPE_SCALE ships (12-13px caption/small roles). Below 12px, complex kanji like 鬱 (depression), 薔薇 (rose), or 驚 (surprise) with many strokes become illegible blobs; treat anything below 12px as an error.",
+    css_suggestion: "font-size: 16px; /* Recommended body floor; 14px body minimum; 12px captions only */",
   },
   {
     id: "sizing_heading_scale_pc",
     category: "sizing",
     rule: "PC heading sizes: 60/40/35/20/16px",
     details:
-      "The standard PC heading scale in Japanese web design: hero/display at 60px, H1 at 40px, H2 at 35px, H3 at 20px, and body at 16px. This scale provides clear hierarchy while accommodating the visual density of kanji. Some teams use slightly different numbers (56/36/28/20/16) but the ratios are consistent.",
+      "A common starter scale in Japanese corporate web design: hero/display at 60px, H1 at 40px, H2 at 35px, H3 at 20px, and body at 16px. This scale provides clear hierarchy while accommodating the visual density of kanji. Some teams use slightly different numbers (56/36/28/20/16) but the ratios are consistent.",
   },
   {
     id: "sizing_heading_scale_mobile",
     category: "sizing",
     rule: "Mobile heading sizes: 32/26/16/13px",
     details:
-      "On mobile (375px), headings compress significantly: hero at 32px, H1 at 26px, H2/body at 16px, caption at 13px. The compression ratio from PC to mobile is roughly 50-65%. Note that 13px for captions pushes against the kanji readability floor -- use it only for supplementary text that does not contain complex kanji.",
+      "A common starter scale in Japanese corporate web design for mobile (375px): hero at 32px, H1 at 26px, H2/body at 16px, caption at 13px. The compression ratio from PC to mobile is roughly 50-65%. Note that 13px for captions pushes against the kanji readability floor -- use it only for supplementary text that does not contain complex kanji.",
   },
 
   // Spacing
@@ -119,51 +119,50 @@ export const TYPOGRAPHY_RULES: TypographyRule[] = [
   {
     id: "spacing_palt",
     category: "spacing",
-    rule: "Use font-feature-settings 'palt' for proportional alternates",
+    rule: "Use font-feature-settings 'palt' on headings and display text only",
     details:
-      "Japanese fonts default to monospaced (full-width) character spacing. Enabling 'palt' (proportional alternate widths) tightens spacing around punctuation and certain characters, making text look more natural and less mechanical. This is especially important for headings and display text where the default full-width spacing of parentheses and punctuation creates awkward gaps.",
+      "Japanese fonts default to monospaced (full-width) character spacing. Enabling 'palt' (proportional alternate widths) tightens spacing around punctuation and certain characters, making headings and display text look more natural and less mechanical. Scope it to headings/display only: body text should keep full-width metrics, which preserve the character grid rhythm and predictable kinsoku behavior. Pair 'palt' with font-kerning: normal so the font's kern data is applied to the proportional widths. Caveat: Yu Gothic's palt metrics are notoriously poor -- test before shipping, or exclude Yu Gothic from palt styling.",
     css_suggestion:
-      'font-feature-settings: "palt"; /* Proportional alternates for Japanese */',
+      'font-feature-settings: "palt"; font-kerning: normal; /* Headings/display only; body keeps full-width metrics */',
   },
   {
     id: "spacing_optical_kerning",
     category: "spacing",
-    rule: "Optical kerning: auto-kerning often wrong, manual adjustment needed",
+    rule: "Optical kerning: Japanese kern data is often limited, display text may need manual adjustment",
     details:
-      "CSS font-kerning: auto and OpenType automatic kerning do not work well with Japanese text. The pair-kerning tables in most Japanese fonts are incomplete or tuned for print. For display text (headings, hero copy), manual kerning adjustments via letter-spacing on individual characters or spans may be necessary. This is a detail-level concern that Japanese design directors will notice.",
+      "Many Japanese fonts carry limited pair-kerning data compared to Latin fonts, so automatic kerning alone often leaves awkward gaps. Enabling 'palt' together with font-kerning: normal turns on proportional spacing where the font supports it. For display text (headings, hero copy), manual kerning adjustments via letter-spacing on individual characters or spans may still be necessary. This is a detail-level concern that Japanese design directors will notice.",
   },
   {
     id: "spacing_baseline_punctuation",
     category: "spacing",
-    rule: "Baseline adjustment needed for colons, semicolons, and hyphens",
+    rule: "Watch punctuation positioning when mixing English and Japanese",
     details:
-      "When mixing English punctuation (colons, semicolons, hyphens) into Japanese text, their vertical position often sits wrong relative to the Japanese characters. English punctuation sits at baseline while Japanese punctuation centers vertically. Manual vertical alignment via vertical-align or position adjustments may be needed for pixel-perfect results. This is most visible in headings and UI labels.",
-    css_suggestion: "vertical-align: 0.1em; /* Tweak per character as needed */",
+      "When mixing English punctuation (colons, semicolons, hyphens) into Japanese text, their vertical position can sit awkwardly relative to the Japanese characters. Japanese punctuation like 、 and 。 sits in the bottom-left of the em box, while Latin punctuation is designed around the Latin baseline, so mixed-script lines can look misaligned. A vertical-align nudge (e.g. 0.1em) is a fragile manual tweak -- prefer choosing a font whose Latin and Japanese glyphs are designed to align. Most visible in headings and UI labels.",
   },
 
   // Wrapping
   {
     id: "wrapping_kinsoku",
     category: "wrapping",
-    rule: "Kinsoku shori: never let punctuation start a new line",
+    rule: "Kinsoku shori: control line-break strictness with line-break: strict",
     details:
-      "Kinsoku shori (禁則処理) is the fundamental Japanese text-wrapping rule: certain characters must never appear at the start of a line (closing brackets, periods, commas) and others must never end a line (opening brackets). CSS word-break: keep-all activates the browser's kinsoku shori engine. Without this, Japanese text wraps mid-word and leaves punctuation in illegal positions. This is a non-negotiable rule.",
-    css_suggestion: "word-break: keep-all; /* Enable kinsoku shori */",
+      "Kinsoku shori (禁則処理) is the fundamental Japanese text-wrapping rule: certain characters must never appear at the start of a line (closing brackets, periods, commas) and others must never end a line (opening brackets). Browsers apply default kinsoku shori to Japanese text automatically. CSS line-break: strict opts into the stricter rule set — it additionally forbids line breaks before small kana (ゃゅょっ) and the prolonged sound mark (ー). Use it on body text where careful typography matters.",
+    css_suggestion: "line-break: strict; /* Stricter kinsoku: small kana, prolonged sound mark */",
   },
   {
     id: "wrapping_word_break",
     category: "wrapping",
-    rule: "Use word-break: keep-all for Japanese text",
+    rule: "Be careful with word-break: keep-all on Japanese body text",
     details:
-      "word-break: keep-all prevents line breaks from occurring between characters that should stay together according to Japanese typographic rules. It respects kinsoku shori and keeps punctuation attached to the correct character. This should be set on any container holding Japanese text. Without it, the browser defaults to break-all behavior which produces ugly, rule-violating line breaks.",
-    css_suggestion: "word-break: keep-all;",
+      "word-break: keep-all is primarily designed for Korean, which uses spaces between words. On long spaceless Japanese body text it can prevent wrapping entirely and cause horizontal overflow, because there are no word boundaries to break at. It is acceptable for short headings when combined with manual break opportunities (<wbr> or zero-width spaces) to control where lines break. For body text, rely on the browser's default kinsoku behavior plus line-break: strict instead.",
+    css_suggestion: "/* Headings only, with <wbr> break points */ word-break: keep-all;",
   },
   {
     id: "wrapping_overflow",
     category: "wrapping",
     rule: "overflow-wrap: break-word as fallback for long strings",
     details:
-      "While word-break: keep-all handles normal Japanese text, long unbroken strings (URLs, email addresses, product codes) can overflow their containers. overflow-wrap: break-word provides a safety net, breaking only when a word would otherwise overflow. Use both properties together for robust Japanese text handling.",
+      "Long unbroken strings (URLs, email addresses, product codes) can overflow their containers because they contain no break opportunities. overflow-wrap: break-word provides a safety net, breaking only when a string would otherwise overflow. Pair it with line-break: strict for robust Japanese text handling.",
     css_suggestion: "overflow-wrap: break-word; /* Fallback for long unbroken strings */",
   },
   {
@@ -218,6 +217,14 @@ export const TYPOGRAPHY_RULES: TypographyRule[] = [
       "Vertical Japanese text (縦書き/tategaki) is written top-to-bottom, right-to-left. CSS writing-mode: vertical-rl enables this. It is used decoratively on modern Japanese websites for headings, pull quotes, navigation labels, and atmospheric sections. Common on ryokan (traditional inn), sake brewery, temple, and cultural sites. Not suitable for long body text on web but powerful for visual impact.",
     css_suggestion:
       "writing-mode: vertical-rl; /* Vertical Japanese text, right-to-left columns */",
+  },
+  {
+    id: "rendering_font_synthesis",
+    category: "rendering",
+    rule: "Disable font synthesis to prevent faux-bold and faux-italic on Japanese text",
+    details:
+      "When a Japanese font stack is missing a requested weight or style, browsers synthesize it: faux-bold smears dense kanji strokes together and faux-italic slants glyphs that have no italic forms. Setting font-synthesis: none (or the granular font-synthesis-weight / font-synthesis-style) prevents this -- the browser falls back to the nearest real weight instead of faking one. This pairs with the no-italics rule: with synthesis disabled, an accidental font-style: italic cannot produce slanted Japanese glyphs. Documented convention of careful Japanese web typography.",
+    css_suggestion: "font-synthesis: none; /* No faux-bold/faux-italic on Japanese text */",
   },
   {
     id: "rendering_text_on_photo",

@@ -62,24 +62,28 @@ export function validateJpForm(params: ValidateFormParams): ValidateFormResult {
       severity: "critical",
       issue: "Missing furigana fields. Required for Japanese names (multiple readings possible).",
       fix: "Add katakana furigana fields below name fields.",
-      code_suggestion: '<label>セイ <input name="sei_kana" pattern="[ァ-ヶー]+" /></label>\n<label>メイ <input name="mei_kana" pattern="[ァ-ヶー]+" /></label>',
+      // Pattern allows nakaguro (・ U+30FB) and spaces so foreign residents' katakana names (e.g. ジョン・スミス) validate.
+      code_suggestion: '<label>セイ <input name="sei_kana" pattern="[ァ-ヶー・　 ]+" /></label>\n<label>メイ <input name="mei_kana" pattern="[ァ-ヶー・　 ]+" /></label>',
     });
   } else if (hasFurigana) {
     passed.push("Furigana fields: Present");
   }
 
   // --- Phone check ---
+  // A single phone field is the modern recommended pattern (Digital Agency / デジタル庁 design
+  // system); the legacy 3-field split is also acceptable. Neither is treated as an error.
   const phoneMatches = form_markup.match(/name=["']?phone/gi) || [];
   if (phoneMatches.length === 1) {
+    passed.push("Phone field: Single input (modern pattern, デジタル庁 recommended; 3-field split also acceptable)");
+  } else if (phoneMatches.length === 2) {
     issues.push({
       field: "phone",
-      severity: "high",
-      issue: "Single phone input. Japanese convention uses 3 separate fields.",
-      fix: "Split into 3 fields: area code (2-5 digits), exchange (1-4 digits), subscriber (4 digits).",
-      code_suggestion: '<input name="phone1" pattern="[0-9]{2,5}" maxlength="5" />\n<span>-</span>\n<input name="phone2" pattern="[0-9]{1,4}" maxlength="4" />\n<span>-</span>\n<input name="phone3" pattern="[0-9]{4}" maxlength="4" />',
+      severity: "low",
+      issue: "Two phone inputs is an unusual split. Japanese forms use either a single field (modern, デジタル庁 recommended) or 3 separate fields (legacy convention).",
+      fix: "Use 1 field (preferred) or 3 fields: area code (2-5 digits), exchange (1-4 digits), subscriber (4 digits).",
     });
   } else if (phoneMatches.length >= 3) {
-    passed.push("Phone fields: Correct 3-field format");
+    passed.push("Phone fields: 3-field format (legacy convention; a single field is also acceptable and デジタル庁-preferred)");
   }
 
   // --- Address / Postal code check ---
@@ -145,7 +149,9 @@ export function validateJpForm(params: ValidateFormParams): ValidateFormResult {
   }
 
   // --- Date field check ---
-  const hasDateField = /type=["']?date["']?/i.test(form_markup) || /name=["']?.*date.*["']?/i.test(form_markup);
+  // Anchored to the quoted attribute value so attribute names like data-update or
+  // words like "candidate"/"validate" elsewhere in the markup don't false-positive.
+  const hasDateField = /type=["']?date["']?/i.test(form_markup) || /name=["'][^"']*date[^"']*["']/i.test(form_markup);
   if (hasDateField && !/年|月|日|birth_year|birth_month|birth_day/.test(form_markup)) {
     issues.push({
       field: "date",

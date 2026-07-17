@@ -28,6 +28,8 @@ export interface SeasonalEvent {
   name_en: string;
   date: string;
   month: number;
+  /** For events spanning multiple months (e.g. Golden Week Apr 29 - May 5). Overrides `month` for matching. */
+  months?: number[];
   design_impact: string;
   business_notes: string;
 }
@@ -188,7 +190,7 @@ export const EVENTS: SeasonalEvent[] = [
     id: "event_setsubun",
     name_ja: "節分",
     name_en: "Setsubun (Bean Throwing)",
-    date: "Feb 3",
+    date: "Feb 3 (occasionally Feb 2, e.g. 2021, 2025)",
     month: 2,
     design_impact:
       "Oni (demon) masks and bean motifs. Ehomaki (恵方巻) sushi roll promotions dominate food retail. A fun, lighthearted design moment. Less formal than other holidays.",
@@ -258,11 +260,12 @@ export const EVENTS: SeasonalEvent[] = [
     name_ja: "ゴールデンウィーク",
     name_en: "Golden Week",
     date: "Apr 29 - May 5",
-    month: 5,
+    month: 4,
+    months: [4, 5],
     design_impact:
       "Travel, leisure, and outdoor imagery. Carp streamers (鯉のぼり) for Children's Day. Bright, energetic spring colors. Multiple holidays clustered together create an extended vacation mood.",
     business_notes:
-      "CRITICAL: DO NOT launch products, features, or campaigns during Golden Week. Decision-makers are on vacation. B2B is completely dead Apr 29 - May 5 (often extending to May 7-8). Travel and leisure ecommerce peaks. Plan campaigns for before or after, never during.",
+      "CRITICAL: DO NOT launch products, features, or campaigns during Golden Week. Decision-makers are on vacation. B2B activity drops sharply Apr 29 - May 5: many companies bridge the gap into a continuous holiday, and while Apr 30 - May 2 are working days in non-bridged years, effective activity is low. Travel and leisure ecommerce peaks. Plan campaigns for before or after, never during.",
   },
   {
     id: "event_kodomo_no_hi",
@@ -311,6 +314,17 @@ export const EVENTS: SeasonalEvent[] = [
   },
   // ── July ─────────────────────────────────────────────────────────────
   {
+    id: "event_tanabata",
+    name_ja: "七夕",
+    name_en: "Tanabata (Star Festival)",
+    date: "Jul 7",
+    month: 7,
+    design_impact:
+      "Bamboo branches, tanzaku (短冊) wish tags, stars, and Milky Way imagery. Blue, purple, and silver color accents. A romantic, wish-making atmosphere.",
+    business_notes:
+      "Wish-making campaigns perform well. Retail and shopping centers run short-lived decoration promotions. A growing commercial event, though smaller than the major gifting seasons. Some regions (notably Sendai) celebrate in August.",
+  },
+  {
     id: "event_ochugen",
     name_ja: "お中元",
     name_en: "Mid-Year Gifts (Ochugen)",
@@ -333,6 +347,17 @@ export const EVENTS: SeasonalEvent[] = [
       "National holiday, often creates a 3-day weekend. Travel and leisure industry peak. Summer sales often kick off around this holiday. Beach and outdoor recreation gear peaks.",
   },
   // ── August ───────────────────────────────────────────────────────────
+  {
+    id: "event_yama_no_hi",
+    name_ja: "山の日",
+    name_en: "Mountain Day",
+    date: "Aug 11",
+    month: 8,
+    design_impact:
+      "Mountain, hiking, and outdoor nature imagery. Green and earth tones. A relatively new holiday (national holiday since 2016) with light design impact on its own.",
+    business_notes:
+      "National holiday. In practice it fuses with Obon (Aug 13-16) into the de facto mid-August blackout week — many companies treat Aug 11-16 as one continuous holiday. Outdoor and travel sectors see a bump. Avoid B2B launches from Aug 11 through the end of Obon.",
+  },
   {
     id: "event_obon",
     name_ja: "お盆",
@@ -395,7 +420,7 @@ export const EVENTS: SeasonalEvent[] = [
     id: "event_black_friday",
     name_ja: "ブラックフライデー",
     name_en: "Black Friday",
-    date: "Late November (4th Friday)",
+    date: "Late November (the Friday after the 4th Thursday)",
     month: 11,
     design_impact:
       "Black, gold, and red color schemes. 'SALE' typography heavy. Growing in Japan — Amazon Japan and major retailers have established it. Still feels more imported than organic.",
@@ -472,7 +497,7 @@ export const MICROSEASONS: Microseason[] = [
     id: "sekki_shunbun",
     name_ja: "春分",
     name_en: "Vernal Equinox",
-    approximate_date: "Mar 21",
+    approximate_date: "Mar 20-21",
     design_notes:
       "Day and night equal. Ohigan (お彼岸) ancestor memorial week. Botamochi (ぼたもち) is the seasonal sweet. National holiday (春分の日). Balance and renewal themes.",
   },
@@ -546,7 +571,7 @@ export const MICROSEASONS: Microseason[] = [
     id: "sekki_risshuu",
     name_ja: "立秋",
     name_en: "Start of Autumn",
-    approximate_date: "Aug 8",
+    approximate_date: "Aug 7",
     design_notes:
       "Autumn begins in the traditional calendar — even though it is still peak summer heat. Seasonal greetings shift from summer (暑中見舞い before, 残暑見舞い after). A subtle but culturally important boundary.",
   },
@@ -654,17 +679,21 @@ export function getSeasonalContext(month: number, day: number): SeasonalContext 
     SEASONS.find((s) => s.months.includes(month)) ?? SEASONS[0];
 
   // Parse a date string like "Jan 1-3", "Feb 14", "2nd Monday of January", etc.
-  // into a comparable month/day for rough matching.
-  const eventMonth = (event: SeasonalEvent): number => event.month;
+  // into a comparable month/day for rough matching. Multi-month events
+  // (e.g. Golden Week spanning Apr 29 - May 5) declare `months`.
+  const eventMonths = (event: SeasonalEvent): number[] =>
+    event.months ?? [event.month];
 
   // Active events: events in the current month
-  const activeEvents = EVENTS.filter((e) => eventMonth(e) === month);
+  const activeEvents = EVENTS.filter((e) => eventMonths(e).includes(month));
 
   // Upcoming events: events in the next 1-2 months (30-60 day lookahead)
   const nextMonth1 = month === 12 ? 1 : month + 1;
   const nextMonth2 = nextMonth1 === 12 ? 1 : nextMonth1 + 1;
   const upcomingEvents = EVENTS.filter(
-    (e) => eventMonth(e) === nextMonth1 || eventMonth(e) === nextMonth2
+    (e) =>
+      !eventMonths(e).includes(month) &&
+      (eventMonths(e).includes(nextMonth1) || eventMonths(e).includes(nextMonth2))
   );
 
   // Find current microseason by approximate date

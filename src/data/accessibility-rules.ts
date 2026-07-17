@@ -18,7 +18,7 @@ export interface JISLevel {
 export const JIS_LEVELS: JISLevel[] = [
   {
     level: "A",
-    wcag_equivalent: "WCAG 2.1 Level A",
+    wcag_equivalent: "WCAG 2.0 Level A",
     description:
       "Minimum level of accessibility. Addresses the most basic barriers. Content must be perceivable, operable, understandable, and robust at a fundamental level.",
     requirement_context:
@@ -26,7 +26,7 @@ export const JIS_LEVELS: JISLevel[] = [
   },
   {
     level: "AA",
-    wcag_equivalent: "WCAG 2.1 Level AA",
+    wcag_equivalent: "WCAG 2.0 Level AA",
     description:
       "Standard target for most organizations. Addresses the most common barriers for disabled users. Includes contrast ratios, resize support, consistent navigation, and input assistance.",
     requirement_context:
@@ -34,7 +34,7 @@ export const JIS_LEVELS: JISLevel[] = [
   },
   {
     level: "AAA",
-    wcag_equivalent: "WCAG 2.1 Level AAA",
+    wcag_equivalent: "WCAG 2.0 Level AAA",
     description:
       "Highest level of accessibility. Includes enhanced contrast (7:1), sign language for media, no time limits, and simpler reading levels. Difficult to achieve for all content types.",
     requirement_context:
@@ -49,15 +49,15 @@ export const ACCESSIBILITY_RULES: AccessibilityRule[] = [
     category: "standard",
     rule: "JIS X 8341-3 is Japan's web accessibility standard",
     details:
-      "JIS X 8341-3:2016 is the Japanese Industrial Standard for web accessibility, titled '高齢者・障害者等配慮設計指針—情報通信における機器，ソフトウェア及びサービス—第3部：ウェブコンテンツ' (Guidelines for older persons and persons with disabilities — Information and communication equipment, software, and services — Part 3: Web content). It is technically aligned with WCAG 2.0 and references WCAG 2.1. Three conformance levels: A, AA, AAA, mapping directly to WCAG levels.",
+      "JIS X 8341-3:2016 is the Japanese Industrial Standard for web accessibility, titled '高齢者・障害者等配慮設計指針—情報通信における機器，ソフトウェア及びサービス—第3部：ウェブコンテンツ' (Guidelines for older persons and persons with disabilities — Information and communication equipment, software, and services — Part 3: Web content). It corresponds to WCAG 2.0 (ISO/IEC 40500:2012). Three conformance levels: A, AA, AAA, mapping directly to WCAG levels.",
     jis_reference: "JIS X 8341-3:2016 (全般)",
   },
   {
     id: "a11y_government_requirement",
     category: "standard",
-    rule: "Government sites must meet JIS X 8341-3 AA since 2016",
+    rule: "Government sites are strongly directed to meet JIS X 8341-3 AA since 2016",
     details:
-      "The Ministry of Internal Affairs and Communications (総務省) established guidelines requiring all national and local government websites to conform to JIS X 8341-3 Level AA. The '国の行政機関における情報アクセシビリティ向上のための取組' directive mandates this. Public sector organizations must publish accessibility conformance statements (ウェブアクセシビリティ方針) on their sites and conduct regular testing.",
+      "The Ministry of Internal Affairs and Communications (総務省) みんなの公共サイト運用ガイドライン (2016) strongly directs national and local government websites to conform to JIS X 8341-3 Level AA — a de facto requirement for the public sector, though guideline-based rather than statutory. Public sector organizations are expected to publish accessibility conformance statements (ウェブアクセシビリティ方針) on their sites and conduct regular testing.",
     jis_reference: "JIS X 8341-3:2016 適合レベルAA",
   },
   {
@@ -147,8 +147,8 @@ export const ACCESSIBILITY_RULES: AccessibilityRule[] = [
     category: "motor",
     rule: "Touch targets: minimum 44x44px",
     details:
-      "Interactive elements must have a minimum touch/click target size of 44x44px (CSS pixels). This is critical for Japan's large elderly population who may have reduced fine motor control, tremors, or use assistive devices. Applies to buttons, links, form controls, and any tappable element. On mobile, this is especially important as older Japanese users commonly use smartphones but struggle with small targets.",
-    jis_reference: "JIS X 8341-3:2016 2.5.5 (WCAG 2.1)",
+      "Interactive elements should have a touch/click target size of 44x44px (CSS pixels). 44x44px is the WCAG 2.1 Level AAA criterion (SC 2.5.5 Target Size); the WCAG 2.2 Level AA minimum is 24x24px (SC 2.5.8). Note that JIS X 8341-3:2016 mirrors WCAG 2.0 and has no target-size criterion. 44px remains the recommended convention in Japan — critical for the large elderly population who may have reduced fine motor control, tremors, or use assistive devices. Applies to buttons, links, form controls, and any tappable element.",
+    jis_reference: "WCAG 2.1 SC 2.5.5 (AAA); WCAG 2.2 SC 2.5.8 (AA, 24x24px minimum)",
   },
   {
     id: "a11y_keyboard_with_ime",

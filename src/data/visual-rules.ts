@@ -22,7 +22,7 @@ export const COLOR_MEANINGS: ColorMeaning[] = [
     hex: "#E60033",
     japanese_name: "赤 (aka)",
     positive_meaning: "Prosperity, fortune, vitality, celebration, energy",
-    negative_meaning: "Writing a person's name in red = death association (funeral ink, 赤字で名前を書く is taboo)",
+    negative_meaning: "Writing a person's name in red = death/rudeness association (red was historically used for the names of the living on gravestones awaiting death, and for criminals and severance letters)",
     usage_notes: "Red is NOT a danger/error-only color in Japan. It is used freely as a primary brand color (Rakuten, Docomo, Japan Post). Avoid red text on personal names. Safe for buttons, banners, sale badges, and headings.",
   },
   {
@@ -30,7 +30,7 @@ export const COLOR_MEANINGS: ColorMeaning[] = [
     hex: "#FFFFFF",
     japanese_name: "白 (shiro)",
     positive_meaning: "Purity, cleanliness, sacredness, new beginnings",
-    negative_meaning: "Mourning and death (white is the traditional funeral color in Japan, not black)",
+    negative_meaning: "Mourning and death (white was historically the traditional funeral color in Japan; modern mourning dress is black)",
     usage_notes: "Context-dependent. Excellent for clean UI backgrounds and whitespace-heavy layouts. Be cautious pairing all-white with black in ceremonial or gift-related contexts as it reads as funeral (香典 / koden envelope aesthetic).",
   },
   {
@@ -38,8 +38,8 @@ export const COLOR_MEANINGS: ColorMeaning[] = [
     hex: "#000000",
     japanese_name: "黒 (kuro)",
     positive_meaning: "Formality, power, sophistication, mystery",
-    negative_meaning: "Combined with white evokes funeral context (黒白 = koku-haku, the funeral envelope color scheme)",
-    usage_notes: "Black + white only designs can feel somber. Add an accent color to break the funeral association. Black is fine for text and luxury branding (similar to Western usage).",
+    negative_meaning: "Combined with white can evoke funeral context (黒白 = kuroshiro, the funeral mizuhiki color scheme)",
+    usage_notes: "Monochrome is normal in fashion, luxury, and editorial design. For celebratory, gift, or ceremonial contexts, consider an accent color -- pure black+white there can evoke funeral mizuhiki. Black is fine for text and luxury branding (similar to Western usage).",
   },
   {
     color: "gold",
@@ -47,7 +47,7 @@ export const COLOR_MEANINGS: ColorMeaning[] = [
     japanese_name: "金 (kin)",
     positive_meaning: "Luxury, celebration, prestige, wealth, achievement",
     negative_meaning: "Overuse feels gaudy or untrustworthy",
-    usage_notes: "Standard for premium tiers, loyalty programs, seasonal celebrations (New Year, Osechi). Pairs naturally with red and black. Common in banking and financial services branding.",
+    usage_notes: "Standard for premium tiers, loyalty programs, seasonal celebrations (New Year, Osechi). Pairs naturally with red and black.",
   },
   {
     color: "pink",
@@ -103,25 +103,25 @@ export const VISUAL_RULES: VisualRule[] = [
     id: "color_no_red_names",
     category: "color",
     rule: "Never write a person's name in red text",
-    details: "Writing someone's name in red ink is associated with death in Japanese culture. Historically, names on gravestones (墓石) and funeral-related documents are written in red (朱書き). This is a deeply ingrained taboo. Always use black or dark text for personal names, even in lists or user profiles.",
+    details: "Writing someone's name in red evokes death-related associations in Japanese culture. Historically, red was used on gravestones for the names of the *living* awaiting death (e.g. a surviving spouse, 朱入れ), and for criminals and severance letters. Funeral documents themselves use black or diluted ink (薄墨), never red. The net effect: a red name reads as a death wish or rudeness. Always use black or dark text for personal names, even in lists or user profiles.",
   },
   {
     id: "color_white_mourning",
     category: "color",
     rule: "White means purity but also mourning depending on context",
-    details: "White is the traditional color of mourning in Japan (white kimono for the deceased, white chrysanthemums at funerals). In UI, white is fine for backgrounds and clean layouts. Be cautious when designing celebratory or gift-related interfaces: all-white themes can inadvertently evoke funeral imagery.",
+    details: "White was historically the traditional color of mourning in Japan (white kimono for the deceased, white chrysanthemums at funerals); modern mourning dress is black. In UI, white is fine for backgrounds and clean layouts. Be cautious when designing celebratory or gift-related interfaces: all-white themes can inadvertently evoke funeral imagery.",
   },
   {
     id: "color_black_white_funeral",
     category: "color",
-    rule: "Black and white together evoke funeral context",
-    details: "The black-and-white (黒白 / koku-haku) color combination is the standard for condolence envelopes (香典袋) and funeral notices. Avoid stark black-and-white-only designs for celebratory or ecommerce UIs. Add at least one accent color to break the association.",
+    rule: "For celebratory or ceremonial contexts, consider an accent beyond pure black+white",
+    details: "The black-and-white (黒白 / kuroshiro) mizuhiki color combination is the standard for condolence envelopes (香典袋) and funeral notices. Monochrome design is entirely normal in fashion, luxury, and editorial contexts. But for celebratory, gift, or ceremonial interfaces, consider adding an accent color -- pure black+white there can evoke funeral mizuhiki.",
   },
   {
     id: "color_gold_luxury",
     category: "color",
     rule: "Gold signals luxury and celebration",
-    details: "Gold (金) is associated with prestige, wealth, and festive occasions. It is standard for premium membership tiers, New Year campaigns (お正月), seasonal gift packaging, and financial branding. Use metallic gold gradients sparingly; flat gold tones work better in digital UI.",
+    details: "Gold (金) is associated with prestige, wealth, and festive occasions. It is standard for premium membership tiers, New Year campaigns (お正月), and seasonal gift packaging. Use metallic gold gradients sparingly; flat gold tones work better in digital UI.",
   },
   {
     id: "color_sakura_pink",
@@ -150,8 +150,8 @@ export const VISUAL_RULES: VisualRule[] = [
   {
     id: "color_dark_theme_lag",
     category: "color",
-    rule: "Dark theme adoption in Japan lags 2-3 years behind the West",
-    details: "Dark mode / dark themes were adopted much later in Japan compared to Western markets. Many major Japanese sites still default to light themes. When offering dark mode, treat it as optional and secondary. Do not assume users expect or prefer it. Light, bright, information-dense layouts remain the norm.",
+    rule: "Dark theme adoption is lower on Japanese corporate and EC sites",
+    details: "Dark-mode adoption on Japanese corporate and ecommerce sites is lower than on Western tech products. Many major Japanese sites default to light themes. When offering dark mode, treat it as optional and secondary. Do not assume users expect or prefer it. Light, bright, information-dense layouts remain the norm.",
   },
   // Imagery rules
   {
@@ -221,7 +221,7 @@ export const VISUAL_RULES: VisualRule[] = [
   {
     id: "animation_subtle_preferred",
     category: "animation",
-    rule: "Subtle functional animations preferred over decorative motion",
-    details: "Japanese UI favors purposeful micro-animations: hover state transitions, loading indicators, smooth page transitions, and accordion open/close effects. Avoid flashy decorative animations that serve no functional purpose. Motion should guide attention and provide feedback, not entertain. Keep durations short (200-400ms) and easing natural.",
+    rule: "Corporate and EC sites favor subtle functional animation; brand sites vary",
+    details: "Japanese corporate and ecommerce UI favors purposeful micro-animations: hover state transitions, loading indicators, smooth page transitions, and accordion open/close effects. Brand and campaign sites, by contrast, are often motion-heavy and showcase elaborate animation. For product UI, motion should guide attention and provide feedback, not entertain; keep durations short (200-400ms) and easing natural.",
   },
 ];

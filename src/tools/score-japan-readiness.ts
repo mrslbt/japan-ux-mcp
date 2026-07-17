@@ -71,11 +71,12 @@ export function scoreJapanReadiness(params: ScoreParams): ScoreResult {
     formsWins.push("Add furigana row (セイ / メイ)");
     formsScore -= 20;
   }
+  // No deduction for phone field layout: a single phone field is the modern pattern
+  // recommended by the Digital Agency (デジタル庁) design system, and the legacy 3-field
+  // split is also acceptable.
   const phoneCount = (lower.match(/name=["']?phone/g) || []).length;
   if (phoneCount === 1) {
-    formsIssues.push("Single phone field (should be 3 separate fields)");
-    formsWins.push("Split phone into 3 fields (XXX-XXXX-XXXX)");
-    formsScore -= 15;
+    formsWins.push("Single phone field is fine (modern, デジタル庁-recommended); 3-field split is also acceptable");
   }
   if (/address|住所/i.test(lower) && !/postal|zip|郵便|〒/i.test(lower)) {
     formsIssues.push("No postal code auto-fill");

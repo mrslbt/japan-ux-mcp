@@ -27,9 +27,11 @@ interface UiFinding {
  * not spec clauses — they are labeled "convention" so we never overclaim authority.
  */
 const SOURCES: Record<string, { basis: Basis; source: string }> = {
-  wrapping_kinsoku: { basis: "spec", source: "W3C JLReq (Requirements for Japanese Text Layout) §3 line breaking; JIS X 4051 kinsoku shori" },
+  wrapping_kinsoku: { basis: "spec", source: "W3C JLReq (Requirements for Japanese Text Layout) §3 line breaking; JIS X 4051 kinsoku shori — line-break: strict opts into the stricter rule set (small kana, prolonged sound mark)" },
+  wrapping_word_break: { basis: "convention", source: "CSS word-break: keep-all is designed for Korean; on spaceless Japanese body text it risks overflow — documented web practice, not a JLReq clause" },
+  wrapping_break_all: { basis: "spec", source: "JIS X 4051 kinsoku shori; W3C JLReq line breaking — break-all permits prohibited characters (、。ー small kana) at line starts" },
   wrapping_overflow: { basis: "convention", source: "CSS overflow control; safety net alongside kinsoku" },
-  wrapping_text_align: { basis: "spec", source: "W3C JLReq §3 justification — web browsers lack CJK jūsuji; left-align on web" },
+  wrapping_text_align: { basis: "convention", source: "JLReq describes justified setting as traditional; left-align is the dominant web convention — justify is acceptable for CJK" },
   hierarchy_no_italics: { basis: "spec", source: "W3C JLReq — Japanese has no italic forms; emphasis via weight, kenten dots, or 「」" },
   line_height_body: { basis: "convention", source: "Japanese web practice — 1.8–2.0 for kanji density (a convention, not a JLReq px value)" },
   sizing_kanji_minimum: { basis: "convention", source: "Japanese web accessibility practice — 14px kanji legibility floor" },
@@ -38,7 +40,9 @@ const SOURCES: Record<string, { basis: Basis; source: string }> = {
   font_stack_performance: { basis: "convention", source: "CJK web-font payload (7,000–16,000 glyphs/weight); use font-display: swap" },
   spacing_palt: { basis: "convention", source: "OpenType 'palt' proportional alternates for natural JP punctuation spacing" },
   rendering_text_on_photo: { basis: "convention", source: "JP legibility practice — overlay behind fine-stroke kanji on photos" },
-  color_funeral_palette: { basis: "convention", source: "JP colour symbolism — black + white alone reads as 香典/funeral; add an accent" },
+  rendering_font_synthesis: { basis: "convention", source: "JP web typography practice — font-synthesis: none prevents faux-bold/faux-italic on missing JP weights" },
+  color_funeral_palette: { basis: "convention", source: "JP colour symbolism — in celebratory/gift/ceremonial contexts, pure black + white can evoke funeral mizuhiki (黒白, kuroshiro)" },
+  markup_lang_ja: { basis: "convention", source: "Missing lang=\"ja\" causes Chinese-glyph font fallback in some environments (han unification)" },
   perf_font_weight_count: { basis: "convention", source: "CJK web-font payload — each weight is a full multi-MB glyph set" },
 };
 
@@ -90,15 +94,31 @@ export function reviewJpUi(params: ReviewJpUiParams): ReviewJpUiResult {
     findings.push({
       rule_id: "color_funeral_palette",
       layer: "color",
-      severity: "warning",
+      severity: "info",
       message:
-        "Palette is black + white only. In Japan this reads as funeral / mourning (香典). The Western 'monochrome = premium' convention does not transfer.",
-      fix: "Add at least one accent colour (brand blue, red, or green) to break the funeral association.",
+        "Palette is black + white only. Monochrome is normal in fashion, luxury, and editorial design — but for celebratory, gift, or ceremonial contexts, pure black + white can evoke funeral mizuhiki (黒白, kuroshiro). Consider an accent colour there.",
+      fix: "If the context is celebratory/gift/ceremonial, add an accent colour (brand blue, red, or green).",
       css_suggestion: "/* introduce an accent, e.g. */ --accent: #0068B7;",
       basis: c.basis,
       source: c.source,
     });
-    score -= 8;
+  }
+
+  // 2b) Markup: Japanese characters present but no lang="ja" attribute.
+  // Without it, some environments fall back to Chinese glyph forms for shared
+  // kanji codepoints (han unification).
+  if (markup && /[぀-ヿ㐀-鿿]/.test(markup) && !/lang\s*=\s*["']?ja/i.test(markup)) {
+    const c = cite("markup_lang_ja");
+    findings.push({
+      rule_id: "markup_lang_ja",
+      layer: "typography",
+      severity: "warning",
+      message: 'Markup contains Japanese text but no lang="ja" attribute. Some environments fall back to Chinese glyph forms for shared kanji codepoints.',
+      fix: 'Add lang="ja" to the <html> element (or the Japanese-language container).',
+      basis: c.basis,
+      source: c.source,
+    });
+    score -= 5;
   }
 
   // 3) NEW — performance: loading many weights of a CJK web font.

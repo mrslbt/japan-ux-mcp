@@ -26,7 +26,7 @@ export const PHONE_FORMATS: PhoneFormat[] = [
     prefixes: ["03"],
     totalDigits: 10,
     fields: [2, 4, 4],
-    description: "Tokyo 23 wards",
+    description: "Tokyo area (23 wards and nearby cities)",
   },
   {
     type: "osaka",

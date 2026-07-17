@@ -1,8 +1,8 @@
 // =============================================================================
 // Trust Signals & Legal Requirements for Japanese Web/UX
 // =============================================================================
-// Japan scores 89 on Hofstede's Uncertainty Avoidance Index — the highest of
-// any major market. Missing company info, absent legal pages, or unverifiable
+// Japan scores 92 on Hofstede's Uncertainty Avoidance Index — among the
+// highest of any major market. Missing company info, absent legal pages, or unverifiable
 // claims trigger immediate suspicion. This file codifies every trust and legal
 // element a site targeting Japan needs.
 // =============================================================================
@@ -70,7 +70,7 @@ export const TRUST_SIGNALS: TrustSignal[] = [
     category: "company_info",
     requirement: "Capital amount (資本金)",
     details:
-      "1M yen (¥1,000,000) — the legal minimum — looks undercapitalized and signals a micro-operation. ¥5,000,000 is the minimum credible threshold. ¥10,000,000+ is standard for mid-size firms. If venture-backed, show the full amount (e.g. ¥500,000,000) — it demonstrates investor confidence. Always format with 万円 or 億円 notation.",
+      "Since the 2006 Companies Act (会社法), the legal minimum capital for a KK is just ¥1 — so the displayed amount is purely a perception signal, not a legal threshold. By convention, ¥1,000,000 or less reads as a micro-operation; ¥5,000,000+ is widely perceived as the minimum credible amount, and ¥10,000,000+ is standard for mid-size firms. If venture-backed, show the full amount (e.g. ¥500,000,000) — it demonstrates investor confidence. Always format with 万円 or 億円 notation.",
     context: ["b2b", "corporate", "ecommerce"],
     severity: "required",
   },
@@ -106,7 +106,7 @@ export const TRUST_SIGNALS: TrustSignal[] = [
     category: "company_info",
     requirement: "Completeness of company profile (会社概要)",
     details:
-      "Japan's uncertainty avoidance score (89) means ANY missing field triggers suspicion. The 会社概要 page must include: company name, representative, address, founding date, capital, number of employees, main banks (取引銀行), and major clients if B2B. An incomplete profile is worse than no profile — it implies you are hiding something.",
+      "Japan's uncertainty avoidance score (92) means ANY missing field triggers suspicion. The 会社概要 page must include: company name, representative, address, founding date, capital, number of employees, main banks (取引銀行), and major clients if B2B. An incomplete profile is worse than no profile — it implies you are hiding something.",
     context: ["all"],
     severity: "required",
   },
@@ -193,7 +193,7 @@ export const TRUST_SIGNALS: TrustSignal[] = [
     category: "certification",
     requirement: "TRUSTe certification badge",
     details:
-      "For data-sensitive B2B products (HR, finance, healthcare), the TRUSTe/TrustArc certification badge signals independent privacy verification. Display in footer and on pages that collect personal data. The Japanese market recognizes TRUSTe specifically due to JIPDEC promotion.",
+      "For data-sensitive B2B products (HR, finance, healthcare), the TRUSTe/TrustArc certification badge signals independent privacy verification. Display in footer and on pages that collect personal data. In Japan, TRUSTe is operated by JPAC (Japan Privacy Certification Organization); JIPDEC runs the separate Privacy Mark (Pマーク) program.",
     context: ["b2b"],
     severity: "recommended",
   },
@@ -242,7 +242,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Seller name, address, phone number, representative name, price (tax-inclusive), payment methods, delivery timing, return/cancellation policy, additional fees (shipping, handling)",
     details:
-      "This is the single most important legal page for Japanese ecommerce. It must be accessible within one click from any product or checkout page. The Consumer Affairs Agency actively enforces violations. Omitting any required field can result in administrative orders. Since April 2022, the law requires prices to be displayed as tax-inclusive (総額表示). The page is typically titled 特定商取引法に基づく表記 or 特商法表記 and placed in the footer navigation.",
+      "This is the single most important legal page for Japanese ecommerce. Strong convention (and practical expectation) is that it is accessible within one click from any product or checkout page. The Consumer Affairs Agency actively enforces violations. Omitting any required field can result in administrative orders. Note: tax-inclusive price display (総額表示) has been mandatory since April 1, 2021 under the Consumption Tax Act (消費税法第63条) — it is not a Tokushoho requirement. Separately, the June 2022 Tokushoho amendment requires subscription services to clearly present all key contract terms (price, duration, cancellation) on the final order confirmation screen. The page is typically titled 特定商取引法に基づく表記 or 特商法表記 and placed in the footer navigation.",
   },
   {
     id: "law_privacy",
@@ -253,7 +253,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Purpose of data collection (利用目的), data sharing with third parties (第三者提供), data handling procedures, user rights (disclosure, correction, deletion requests), contact for inquiries, name of data controller",
     details:
-      "The APPI was significantly amended in April 2022, removing the threshold exemption — now even small businesses handling any amount of personal data must comply. The privacy policy must be written in Japanese for Japanese users. Cross-border data transfers require explicit disclosure of destination countries and their data protection regimes. Consent must be affirmative (pre-checked boxes are not valid). Cookie data is now partially regulated under the 2022 amendments when combined with other identifiers.",
+      "The 5,000-record small-business threshold exemption was removed by the 2015 amendment (effective May 30, 2017) — since then even small businesses handling any amount of personal data must comply. The April 2022 amendment added mandatory breach reporting to the PPC, rules for pseudonymized data (仮名加工情報), and stricter cross-border disclosure requirements: transfers abroad require disclosure of destination countries and their data protection regimes. A Japanese-language privacy policy is a strong practical expectation for Japanese users (not an explicit statutory language requirement). Note that the APPI does not impose GDPR-style consent formalities; opt-out schemes exist for third-party provision (23条), but clear affirmative consent is best practice. Cookie data is partially regulated under the 2022 amendments when combined with other identifiers (個人関連情報).",
   },
   {
     id: "law_terms_of_service",
@@ -275,7 +275,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Cookie usage notice, purpose categories, consent mechanism (opt-in for sensitive tracking), opt-out method, link to full cookie policy",
     details:
-      "Japan does not have a GDPR-equivalent cookie law, but the 2023 amendment to the Telecommunications Business Act (電気通信事業法) introduced requirements for 'external transmission' (外部送信) of user data. Telecommunications businesses must now inform users about third-party data transmission or obtain consent. While not strictly required for all sites, cookie banners are becoming standard practice in Japan, and GDPR compliance is expected for sites accessible from the EU. Implement at minimum an informational banner with opt-out capability.",
+      "Japan does not have a GDPR-equivalent cookie law, but the Telecommunications Business Act (電気通信事業法) amendment passed in June 2022 (effective June 16, 2023) introduced requirements for 'external transmission' (外部送信規律) of user data. Telecommunications businesses must now inform users about third-party data transmission or obtain consent. While not strictly required for all sites, cookie banners are becoming standard practice in Japan, and GDPR compliance is expected for sites accessible from the EU. Implement at minimum an informational banner with opt-out capability.",
   },
   {
     id: "law_payment_services",
@@ -286,7 +286,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Registration number, registered business name, fund management method, consumer protection measures, complaint resolution process, link to regulatory filings",
     details:
-      "Any business issuing prepaid payment instruments (gift cards, points systems with cash value, digital currencies) worth over ¥10,000,000 outstanding must register with the Finance Bureau. Cryptocurrency exchanges must register as Virtual Currency Exchange Service Providers. Display the registration number prominently. The FSA maintains a public registry of licensed operators — users will check it.",
+      "Any business issuing self-issued prepaid payment instruments (gift cards, points systems with cash value, digital currencies) with over ¥10,000,000 outstanding must file a notification (届出) with the Finance Bureau; third-party-usable instruments require registration. Cryptocurrency exchanges must register as crypto-asset exchange service providers (暗号資産交換業者). Display the registration number prominently. The FSA maintains a public registry of licensed operators — users will check it.",
   },
   {
     id: "law_premiums_representations",
@@ -297,7 +297,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Accurate product/service descriptions, substantiated claims, clear conditions for promotions, 'No.1' claim substantiation, comparison advertising basis, prize/campaign value limits",
     details:
-      "The Consumer Affairs Agency aggressively enforces this law. 'No.1' claims (e.g. 顧客満足度No.1) require documented survey methodology and must be current. Superlatives like '最安値' (cheapest) or '最高品質' (highest quality) need substantiation. Before/after comparisons must be representative. Prize campaigns have value caps: general prizes max ¥100,000 or 1/20 of transaction value; open prizes max ¥100,000. Violations result in cease-and-desist orders and are published publicly — reputational damage is severe.",
+      "The Consumer Affairs Agency aggressively enforces this law. 'No.1' claims (e.g. 顧客満足度No.1) require documented survey methodology and must be current. Superlatives like '最安値' (cheapest) or '最高品質' (highest quality) need substantiation. Before/after comparisons must be representative. Prize campaigns have value caps: general prize competitions (一般懸賞) allow a maximum prize of 20x the transaction value, capped at ¥100,000, with total prizes limited to 2% of expected sales; gifts to all purchasers (総付景品) are capped at 20% of the transaction value (with a ¥200 minimum floor when the transaction is under ¥1,000); open prize campaigns (オープン懸賞, no purchase required) have NO cap — the former ¥10,000,000 ceiling was abolished in 2006. Violations result in cease-and-desist orders and are published publicly — reputational damage is severe.",
   },
   {
     id: "law_pharmaceutical",
@@ -315,11 +315,11 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     law_name_ja: "電気通信事業法",
     law_name_en: "Telecommunications Business Act",
     applies_to:
-      "Telecommunications carriers, ISPs, VoIP providers, messaging services, and since 2023 amendments, many web services transmitting user data externally",
+      "Telecommunications carriers, ISPs, VoIP providers, messaging services, and — since the June 2022 amendment took effect on June 16, 2023 — many web services transmitting user data externally",
     what_to_display:
       "Service terms (約款), complaint handling procedures, data handling practices, external data transmission notice (外部送信規律), registered/notified business status",
     details:
-      "The June 2023 amendments significantly expanded scope. Websites and apps that transmit user information to third parties (analytics, ad networks, CDNs) must now inform users about these transmissions. This applies to a broad range of online services. Required information includes: what data is sent, to whom, and for what purpose. Options include public disclosure on the site, prior notification, or obtaining consent. The MIC provides guidance and the requirement is actively monitored.",
+      "The amendment passed in June 2022 (effective June 16, 2023) significantly expanded scope. Websites and apps that transmit user information to third parties (analytics, ad networks, CDNs) must now inform users about these transmissions. This applies to a broad range of online services. Required information includes: what data is sent, to whom, and for what purpose. Options include public disclosure on the site, prior notification, or obtaining consent. The MIC provides guidance and the requirement is actively monitored.",
   },
   {
     id: "law_secondhand_goods",
@@ -330,7 +330,7 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Secondhand goods dealer license number (古物商許可番号), issuing public safety commission, dealer name, types of goods handled",
     details:
-      "Required for any business dealing in secondhand goods, including online marketplaces. The license is obtained from the prefectural Public Safety Commission (公安委員会). The 13-digit license number must be displayed on the website. Identity verification of sellers is required for transactions over ¥10,000. This law exists primarily for crime prevention (stolen goods tracking). Operating without a license is a criminal offense (up to 3 years imprisonment or ¥1,000,000 fine). Major platforms like Mercari and Yahoo Auctions prominently display this.",
+      "Required for any business dealing in secondhand goods, including online marketplaces. The license is obtained from the prefectural Public Safety Commission (公安委員会). The 12-digit license number must be displayed on the website. Identity verification of sellers is required for transactions over ¥10,000. This law exists primarily for crime prevention (stolen goods tracking). Operating without a license is a criminal offense (up to 3 years imprisonment or ¥1,000,000 fine). Major platforms like Mercari and Yahoo Auctions prominently display this.",
   },
   {
     id: "law_privacy_mark",
@@ -341,6 +341,6 @@ export const LEGAL_REQUIREMENTS: LegalRequirement[] = [
     what_to_display:
       "Privacy Mark logo (Pマーク), certification number, link to JIPDEC verification page, certification validity period",
     details:
-      "Administered by JIPDEC (Japan Institute for Promotion of Digital Economy and Community). The Privacy Mark certifies compliance with JIS Q 15001, Japan's personal information management standard. Over 16,000 organizations hold the mark. For B2B sales to enterprises and government, it is often a de facto procurement requirement — listed in RFP checklists. The certification process takes 6-12 months and requires biennial renewal. The mark must be displayed as specified in JIPDEC guidelines (size, placement, linking rules).",
+      "Administered by JIPDEC (Japan Institute for Promotion of Digital Economy and Community). The Privacy Mark certifies compliance with JIS Q 15001, Japan's personal information management standard. Over 17,000 organizations hold the mark. For B2B sales to enterprises and government, it is often a de facto procurement requirement — listed in RFP checklists. The certification process takes 6-12 months and requires biennial renewal. The mark must be displayed as specified in JIPDEC guidelines (size, placement, linking rules).",
   },
 ];

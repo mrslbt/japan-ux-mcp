@@ -251,7 +251,7 @@ server.registerTool(
   "check_jp_typography",
   {
     title: "Check JP Typography",
-    description: "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.8+ for Japanese), font sizes (14px minimum for kanji), word-break: keep-all (kinsoku shori), text-on-photo overlays, font-feature-settings 'palt', and more. Returns score, issues, and a recommended font stack for your context.",
+    description: "Audit CSS and markup for Japanese typography issues. Checks: font stacks (Noto Sans JP, Hiragino, Yu Gothic), line-height (1.7-2.0 for Japanese body text), font sizes (14px body minimum, 12px captions floor), kinsoku shori (line-break: strict), text-on-photo overlays, font-feature-settings 'palt' on headings, font-synthesis, and more. Returns score, issues, and a recommended font stack for your context.",
     inputSchema: withTitles({
       css: z.string().describe("CSS content to audit for Japanese typography issues"),
       markup: z.string().optional().describe("Optional HTML/JSX markup for additional context (background images, text-on-photo detection)"),
@@ -790,11 +790,11 @@ server.registerResource(
 
 ## Critical Rules
 - **No italics**: Japanese has no italic form. Use bold/color/size for emphasis.
-- **Line-height 1.8+**: Kanji density requires more vertical space than Latin text.
-- **16px body minimum**: Kanji readability breaks below 14px.
-- **word-break: keep-all + line-break: strict**: Enables kinsoku shori (never start a line with punctuation). Use both properties together for correct line breaking.
-- **font-feature-settings: "palt"**: Proportional alternates for better punctuation spacing.
-- **No text-align: justify**: Browsers lack print-quality CJK justification.`,
+- **Line-height 1.7-2.0**: Kanji density needs more vertical space than Latin text; below 1.5 is cramped.
+- **16px body recommended**: 14px is the body minimum; 12-13px only for captions and fine print.
+- **line-break: strict**: Browsers apply default kinsoku shori automatically; line-break: strict opts into stricter rules. Avoid word-break: keep-all on Japanese body text (overflow risk; it is primarily for Korean).
+- **font-feature-settings: "palt"**: Proportional alternates for headings and display text only; body text keeps full-width metrics.
+- **text-align**: Left-align is the dominant web convention; justify is acceptable for CJK.`,
       },
     ],
   })
@@ -932,7 +932,7 @@ server.registerResource(
 - **NEVER write names in red**: Death association (funeral ink)
 - **Black + white only**: Evokes funeral (add an accent color)
 - **Bright is normal**: Dense, colorful layouts are expected, not spammy
-- **Dark theme lags**: Japan is 2-3 years behind in dark mode adoption
+- **Dark theme lags**: Dark mode adoption lags in Japan — keep light as default
 - **No halation**: Don't place two same-brightness vivid colors adjacent
 - **Red cross is illegal**: Protected by law, use a different medical icon
 - **Consistent shadows**: All shadows from the same direction on one page

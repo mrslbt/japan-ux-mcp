@@ -17,7 +17,7 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     category: "line",
     pattern: "LINE Login (social login)",
     details:
-      "LINE has 96M+ monthly active users in Japan. LINE Login is the most trusted social login option—far more than Facebook or Google login for Japanese consumers. Users authenticate via their LINE account and you receive a LINE user ID, display name, profile image, and optionally email.",
+      "LINE has 97M monthly active users in Japan (2024). LINE Login is the most trusted social login option—far more than Facebook or Google login for Japanese consumers. Users authenticate via their LINE account and you receive a LINE user ID, display name, profile image, and optionally email.",
     implementation_notes:
       "Use the LINE Login v2.1 channel via LINE Developers console. Redirect flow: your site → LINE auth screen → callback URL with auth code → exchange for access token. Add the LINE Login button using official assets (green button, LINE icon). Place it as the first social login option. Request `openid`, `profile`, and optionally `email` scopes. Handle the LIFF (LINE Front-end Framework) login flow separately if running inside LINE's in-app browser.",
   },
@@ -27,9 +27,9 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     category: "line",
     pattern: "LINE Official Account for customer communication",
     details:
-      "LINE Official Accounts are the primary channel for business-to-customer messaging in Japan, replacing email newsletters for many companies. Users 'friend' the account and receive push messages, coupons, and support. Open rates on LINE messages vastly exceed email (60%+ vs 20%).",
+      "LINE Official Accounts are the primary channel for business-to-customer messaging in Japan, replacing email newsletters for many companies. Users 'friend' the account and receive push messages, coupons, and support. Open rates on LINE messages are commonly reported as far higher than email (uncited industry figures).",
     implementation_notes:
-      "Create a LINE Official Account at manager.line.biz. Expose a '友だち追加' (Add Friend) button with QR code and deep link (https://lin.ee/xxxxx). Use the Messaging API for programmatic messages. Segment users with tags and audiences. Rate limits apply: free tier allows 200 push messages/month; paid plans scale up. Always provide opt-out instructions per Japanese anti-spam law (特定電子メール法).",
+      "Create a LINE Official Account at manager.line.biz. Expose a '友だち追加' (Add Friend) button with QR code and deep link (https://lin.ee/xxxxx). Use the Messaging API for programmatic messages. Segment users with tags and audiences. Rate limits apply: free tier allows 200 push messages/month; paid plans scale up. Always provide opt-out instructions — a requirement under LINE platform policy and APPI good practice (the 特定電子メール法 anti-spam law covers email/SMS, not LINE push messages).",
   },
   {
     id: "line_share_button",
@@ -55,11 +55,11 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     id: "line_pay",
     platform: "LINE",
     category: "line",
-    pattern: "LINE Pay integration",
+    pattern: "LINE Pay (discontinued in Japan)",
     details:
-      "LINE Pay is one of Japan's major mobile payment services, integrated directly into the LINE app. Users can pay online and in-store. It offers a smooth checkout experience for LINE's massive user base and supports recurring payments, refunds, and point rewards.",
+      "DISCONTINUED: LINE Pay's domestic Japan service was terminated on April 30, 2025. Users were migrated to PayPay (both are under LY Corporation). LINE Pay continues to operate only in Taiwan and Thailand. Do not add LINE Pay to a new Japan-facing checkout.",
     implementation_notes:
-      "Integrate via LINE Pay API v3. Flow: Request API → Reserve API (create payment) → user confirms in LINE app → Confirm API (capture payment). Display the LINE Pay button (official green assets) alongside other payment methods. Support both online and offline (QR code) flows. Handle the payment confirmation callback URL. Sandbox environment available for testing. Required fields: orderId, amount, currency (JPY), productName.",
+      "For new integrations targeting Japan, use PayPay instead (see the payment_paypay pattern). If maintaining a legacy checkout that still lists LINE Pay, remove it and direct users to PayPay. For Taiwan or Thailand, LINE Pay remains available via the LINE Pay API.",
   },
   {
     id: "line_messaging_api",
@@ -99,7 +99,7 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     category: "qr_code",
     pattern: "Common QR code use cases: menus, payment, app downloads, event check-in",
     details:
-      "Restaurant menus: QR code on the table links to a digital menu (accelerated by COVID). Payment: scan-to-pay at registers (PayPay, LINE Pay). App downloads: QR code linking to App Store / Google Play. Event check-in: QR code on ticket scanned at entry. Business cards: QR codes encoding vCard data. Wi-Fi access: QR codes for automatic Wi-Fi connection. Coupons: QR codes in LINE messages or flyers.",
+      "Restaurant menus: QR code on the table links to a digital menu (accelerated by COVID). Payment: scan-to-pay at registers (PayPay, Rakuten Pay). App downloads: QR code linking to App Store / Google Play. Event check-in: QR code on ticket scanned at entry. Business cards: QR codes encoding vCard data. Wi-Fi access: QR codes for automatic Wi-Fi connection. Coupons: QR codes in LINE messages or flyers.",
     implementation_notes:
       "For restaurant menus, link to a responsive web page (not a PDF). For payments, follow each payment provider's QR specification (MPM or CPM). For app downloads, use a smart link that detects OS and redirects to the correct store. For events, encode a unique ticket ID and validate server-side to prevent duplicate check-ins. For Wi-Fi, use the WIFI: URI scheme (`WIFI:T:WPA;S:networkname;P:password;;`).",
   },
@@ -149,11 +149,11 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     id: "payment_line_pay",
     platform: "LINE Pay",
     category: "mobile_payment",
-    pattern: "LINE Pay integration",
+    pattern: "LINE Pay (discontinued in Japan)",
     details:
-      "LINE Pay integrates directly into the LINE app, making it seamless for LINE's massive user base. Users can split bills with friends, send money, and pay merchants. Merged operations with PayPay for in-store payments but remains separate for online payments.",
+      "DISCONTINUED: LINE Pay's domestic Japan service was terminated on April 30, 2025, with users migrated to PayPay. The service continues only in Taiwan and Thailand. Do not offer LINE Pay as a payment method for Japanese customers.",
     implementation_notes:
-      "See the line_pay pattern for detailed integration notes. Online integration uses LINE Pay API v3. For cross-selling, combine LINE Login + LINE Pay for a single-tap checkout experience where the user is already logged in via LINE. Display official LINE Pay badge on checkout page.",
+      "Use PayPay for Japan-facing checkouts (see the payment_paypay pattern). Remove any legacy LINE Pay buttons or badges from Japanese payment pages and replace them with PayPay.",
   },
   {
     id: "payment_merpay",
@@ -181,9 +181,9 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     category: "mobile_payment",
     pattern: "Apple Pay / Google Pay adoption in Japan",
     details:
-      "Apple Pay and Google Pay are growing in Japan, especially among younger users. Apple Pay supports Japanese credit cards, Suica, PASMO, and nanaco. Google Pay supports Suica, nanaco, Rakuten Edy, WAON, and QUICPay. Both use the FeliCa NFC standard for contactless in-store payments, not standard NFC-A/B.",
+      "Apple Pay and Google Pay are growing in Japan, especially among younger users. Apple Pay supports Japanese credit cards, Suica, PASMO, and nanaco. Google Pay supports Suica, nanaco, Rakuten Edy, WAON, and QUICPay. Japan now uses BOTH FeliCa (iD, QUICPay, transit cards) and EMV contactless — Visa/Mastercard タッチ決済 via Apple Pay has been supported since 2021 and is increasingly common at POS.",
     implementation_notes:
-      "For web payments, implement Apple Pay via Apple Pay JS API and Google Pay via Google Pay API. Use the Payment Request API for a unified flow. Display both buttons on checkout pages. In Japan, Apple Pay uses FeliCa (not EMV contactless), so in-store POS terminals must support iD or QUICPay protocols. Test on actual Japanese devices—the NFC stack differs from Western markets.",
+      "For web payments, implement Apple Pay via Apple Pay JS API and Google Pay via Google Pay API. Use the Payment Request API for a unified flow. Display both buttons on checkout pages. In Japan, in-store contactless runs on both FeliCa (iD / QUICPay / transit IC) and EMV contactless (Visa/Mastercard タッチ決済) — check which protocols the POS terminal supports. Test on actual Japanese devices—the NFC stack differs from Western markets.",
   },
   {
     id: "payment_konbini",
@@ -223,7 +223,7 @@ export const PLATFORM_PATTERNS: PlatformPattern[] = [
     details:
       "Japanese users expect to see all available payment methods displayed with recognizable logos on the payment selection page. Unlike Western markets where credit card is the default, Japan has many payment methods and users want to choose their preferred one. Showing multiple options also builds trust—it signals a legitimate, established business.",
     implementation_notes:
-      "Display payment methods in a vertical radio-button list with official logos (not text only). Recommended order: credit card (Visa, Mastercard, JCB, AMEX) → PayPay → LINE Pay → Rakuten Pay → Merpay → Apple Pay / Google Pay → konbini payment → bank transfer → cash on delivery. Show all accepted credit card brand logos in a row. Expand the selected method's form inline (card number fields, konbini selection, etc.). Include a security badge (SSL/TLS, PCI DSS) near the credit card form. JCB must be included—it is Japan's domestic card network.",
+      "Display payment methods in a vertical radio-button list with official logos (not text only). Recommended order: credit card (Visa, Mastercard, JCB, AMEX) → PayPay → Rakuten Pay → Merpay → Apple Pay / Google Pay → konbini payment → bank transfer → cash on delivery. Show all accepted credit card brand logos in a row. Expand the selected method's form inline (card number fields, konbini selection, etc.). Include a security badge (SSL/TLS, PCI DSS) near the credit card form. JCB must be included—it is Japan's domestic card network.",
   },
 
   // ─── Social Sharing ────────────────────────────────────────────────

@@ -63,7 +63,7 @@ export const NAVIGATION_RULES: NavigationRule[] = [
     id: "header_social_links",
     category: "header",
     rule: "Include LINE and social media links in header or footer",
-    details: "LINE is the dominant messaging platform in Japan (over 90M users). Include the LINE official account link alongside Twitter/X, Instagram, and Facebook. LINE is more important than Facebook in Japan. Place social icons in the header utility bar or footer. Link to the official LINE account for customer communication.",
+    details: "LINE is the dominant messaging platform in Japan (97M monthly active users, 2024). Include the LINE official account link alongside Twitter/X, Instagram, and Facebook. LINE is more important than Facebook in Japan. Place social icons in the header utility bar or footer. Link to the official LINE account for customer communication.",
     platform: "both",
   },
   // Menu rules
@@ -71,7 +71,7 @@ export const NAVIGATION_RULES: NavigationRule[] = [
     id: "menu_hamburger_mobile_only",
     category: "menu",
     rule: "Hamburger menu is for mobile only; always show visible nav links on PC",
-    details: "Japanese PC users expect to see all primary navigation options visible in the header without having to click a hamburger menu. Hiding navigation behind a hamburger icon on desktop makes the site feel incomplete or broken. On mobile, the hamburger menu is standard and expected. PC sites should have full horizontal navigation bars.",
+    details: "The common convention on Japanese corporate and ecommerce sites is to show all primary navigation options visible in the PC header rather than behind a hamburger menu. Desktop hamburgers do appear on fashion, editorial, and brand-led sites, but for mainstream corporate/EC audiences visible horizontal navigation is the safer default. On mobile, the hamburger menu is standard and expected.",
     platform: "both",
   },
   {

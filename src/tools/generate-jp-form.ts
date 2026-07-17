@@ -27,7 +27,7 @@ function getButtonText(type: FormType, level: KeigoLevel): string {
       casual: "送信",
       neutral: "送信する",
       formal: "お問い合わせを送信する",
-      very_formal: "お問い合わせ内容をご確認",
+      very_formal: "お問い合わせ内容を確認する",
     },
     checkout: {
       casual: "買う",
@@ -39,7 +39,7 @@ function getButtonText(type: FormType, level: KeigoLevel): string {
       casual: "送信",
       neutral: "送信する",
       formal: "お問い合わせ内容を確認する",
-      very_formal: "お問い合わせ内容をご確認",
+      very_formal: "お問い合わせ内容を確認する",
     },
     login: {
       casual: "ログイン",
@@ -99,12 +99,16 @@ export function generateJpForm(params: GenerateFormParams): { markup: string; no
         lines.push(`${i}<fieldset>`);
         if (include_labels) lines.push(`${i}${i}<legend>${label("name", language)}</legend>`);
         lines.push(`${i}${i}<div ${cls("name-fields")}>`);
-        const valAttr = include_validation ? ' pattern="[一-龥ぁ-んァ-ヶー々〇]+"' : "";
+        // Includes CJK Compatibility Ideographs (豈-﫿) and Extension A (㐀-䶿) so legal
+        // variant surnames like 山﨑 (U+FA11) validate correctly.
+        const valAttr = include_validation ? ' pattern="[一-龥豈-﫿㐀-䶿ぁ-んァ-ヶー々〇]+"' : "";
         lines.push(`${i}${i}${i}<label>${label("sei", language)} <input name="sei"${valAttr} required /></label>`);
         lines.push(`${i}${i}${i}<label>${label("mei", language)} <input name="mei"${valAttr} required /></label>`);
         lines.push(`${i}${i}</div>`);
         lines.push(`${i}${i}<div ${cls("furigana-fields")}>`);
-        const kanaAttr = include_validation ? ' pattern="[ァ-ヶー]+"' : "";
+        // Allows nakaguro (・ U+30FB) and spaces so foreign residents' katakana names
+        // (e.g. ジョン・スミス) validate correctly.
+        const kanaAttr = include_validation ? ' pattern="[ァ-ヶー・　 ]+"' : "";
         lines.push(`${i}${i}${i}<label>${label("sei_kana", language)} <input name="sei_kana"${kanaAttr} required /></label>`);
         lines.push(`${i}${i}${i}<label>${label("mei_kana", language)} <input name="mei_kana"${kanaAttr} required /></label>`);
         lines.push(`${i}${i}</div>`);

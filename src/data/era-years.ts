@@ -6,6 +6,10 @@ export interface Era {
   endDate: string | null;
 }
 
+// Note on era boundaries: for the Meiji→Taisho (1912-07-30) and Taisho→Showa
+// (1926-12-25) transitions, the changeover day legally belonged to BOTH eras.
+// The endDate values below assign that day to the newer era, following everyday
+// conversion convention.
 export const ERAS: Era[] = [
   { name: "令和", nameRomaji: "Reiwa", abbrev: "R", startDate: "2019-05-01", endDate: null },
   { name: "平成", nameRomaji: "Heisei", abbrev: "H", startDate: "1989-01-08", endDate: "2019-04-30" },

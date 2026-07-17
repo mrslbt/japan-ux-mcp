@@ -54,5 +54,5 @@ export const PREFECTURES: Prefecture[] = [
   { code: "44", name: "大分県", nameKana: "オオイタケン", nameRomaji: "Oita", region: "九州", type: "県" },
   { code: "45", name: "宮崎県", nameKana: "ミヤザキケン", nameRomaji: "Miyazaki", region: "九州", type: "県" },
   { code: "46", name: "鹿児島県", nameKana: "カゴシマケン", nameRomaji: "Kagoshima", region: "九州", type: "県" },
-  { code: "47", name: "沖縄県", nameKana: "オキナワケン", nameRomaji: "Okinawa", region: "九州", type: "県" },
+  { code: "47", name: "沖縄県", nameKana: "オキナワケン", nameRomaji: "Okinawa", region: "九州・沖縄", type: "県" },
 ];

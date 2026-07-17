@@ -137,19 +137,19 @@ export function auditJapanUx(params: AuditParams): AuditResult {
     typoPassed.push("No italics applied to Japanese text");
   }
 
-  // Check line-height
+  // Check line-height (convention-level: JLReq-derived practice, not a hard spec)
   const lhMatch = combined.match(/line-height\s*:\s*([0-9.]+)/);
   if (lhMatch && parseFloat(lhMatch[1]) < 1.7) {
     typoIssues.push({
       category: "typography",
-      severity: "critical",
+      severity: "minor",
       rule_id: "line_height_body",
-      finding: `Line-height ${lhMatch[1]} is too tight for Japanese. Minimum is 1.8.`,
-      recommendation: "Increase line-height to 1.8-2.0 for Japanese body text.",
+      finding: `Line-height ${lhMatch[1]} is tighter than Japanese convention. Recommended 1.7-2.0 for body text (JLReq-derived practice); below 1.5 is problematic.`,
+      recommendation: "Increase line-height to 1.7-2.0 for Japanese body text.",
     });
-    typoScore -= 15;
-  } else if (lhMatch && parseFloat(lhMatch[1]) >= 1.8) {
-    typoPassed.push("Line-height meets Japanese standard");
+    typoScore -= 5;
+  } else if (lhMatch && parseFloat(lhMatch[1]) >= 1.7) {
+    typoPassed.push("Line-height meets Japanese convention (1.7+)");
   }
 
   // Check font stack
@@ -168,18 +168,22 @@ export function auditJapanUx(params: AuditParams): AuditResult {
     }
   }
 
-  // Check word-break
-  if (/word-break\s*:\s*keep-all/i.test(combined)) {
-    typoPassed.push("word-break: keep-all enabled (kinsoku shori)");
-  } else {
+  // Check kinsoku shori: line-break: strict is the correct signal.
+  // (Browsers apply base kinsoku rules to Japanese text by default, so its
+  // absence is not an issue — presence is a positive signal.)
+  if (/line-break\s*:\s*strict/i.test(combined)) {
+    typoPassed.push("line-break: strict enabled (kinsoku shori)");
+  }
+  // word-break: keep-all on Japanese body text risks overflow, not kinsoku
+  if (/word-break\s*:\s*keep-all/i.test(combined) && /[\u3000-\u9fff]/.test(markup)) {
     typoIssues.push({
       category: "typography",
-      severity: "major",
+      severity: "minor",
       rule_id: "wrapping_kinsoku",
-      finding: "word-break: keep-all not found. Japanese text may break at illegal positions.",
-      recommendation: "Add word-break: keep-all to text containers.",
+      finding: "word-break: keep-all applied alongside Japanese text. This prevents breaks inside long CJK runs and risks text overflowing its container.",
+      recommendation: "Remove word-break: keep-all from Japanese body text. Use line-break: strict for stricter kinsoku shori instead.",
     });
-    typoScore -= 10;
+    typoScore -= 5;
   }
 
   typoScore = Math.max(0, typoScore);
@@ -213,7 +217,7 @@ export function auditJapanUx(params: AuditParams): AuditResult {
       category: "visual",
       severity: "info",
       rule_id: "color_dark_theme_lag",
-      finding: "Dark theme detected. Dark mode adoption is 2-3 years behind in Japan.",
+      finding: "Dark theme detected. Dark mode adoption lags in Japan.",
       recommendation: "Keep light theme as default. Offer dark mode as opt-in only.",
     });
     visualScore -= 3;

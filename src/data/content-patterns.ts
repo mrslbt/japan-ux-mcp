@@ -24,9 +24,9 @@ export const CONTENT_RULES: ContentRule[] = [
   {
     id: "content_more_text_trusted",
     category: "density",
-    rule: "More text is always better for Japanese consumers",
+    rule: "Comprehensive information builds trust — but density preference is segment-dependent",
     details:
-      "Japanese users associate comprehensive text with trustworthiness and professionalism. A sparse, minimalist product page feels suspicious—like the company is hiding something. Long-form product descriptions, detailed specifications, exhaustive FAQ sections, and thorough explanations all signal credibility. This is the opposite of the Western 'less is more' design philosophy. Do not cut copy for brevity—add more detail instead.",
+      "Japanese users tend to associate comprehensive text with trustworthiness and professionalism, and a sparse product page can feel like the company is hiding something. But the preference is segment-dependent, not universal: modern Japanese B2B/SaaS and premium brands increasingly run cleaner, more spacious layouts. What consistently builds trust is information completeness — full specifications, FAQ sections, fine print, and thorough explanations — rather than raw text volume. Do not cut substantive detail for brevity, but layout density itself should match the segment.",
     context: ["ecommerce", "b2b_saas", "corporate", "service_site", "landing_page"],
   },
   {
@@ -66,9 +66,9 @@ export const CONTENT_RULES: ContentRule[] = [
   {
     id: "content_passive_browsing",
     category: "copy",
-    rule: "Japanese users are passive browsers—guide them with osusume (recommended) lists",
+    rule: "Japanese users often browse passively—guide them with osusume (recommended) lists",
     details:
-      "Japanese online shoppers and service seekers tend to browse passively rather than actively searching with specific intent. They respond well to curated guidance: おすすめ (osusume/recommended) sections, ランキング (rankings), 人気 (popular items), スタッフおすすめ (staff picks), and 今週の注目 (this week's highlights). These editorial curation elements reduce decision paralysis and build trust through implied expert selection.",
+      "Japanese online shoppers and service seekers often tend to browse passively rather than actively searching with specific intent (a tendency, not a universal behavior). They respond well to curated guidance: おすすめ (osusume/recommended) sections, ランキング (rankings), 人気 (popular items), スタッフおすすめ (staff picks), and 今週の注目 (this week's highlights). These editorial curation elements reduce decision paralysis and build trust through implied expert selection.",
     context: ["ecommerce", "media", "consumer_app", "service_site"],
   },
   {

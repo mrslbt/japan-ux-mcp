@@ -9,8 +9,8 @@ export const WIDTH_RULES: WidthRule[] = [
   {
     field: "katakana_furigana",
     requiredWidth: "full-width",
-    pattern: "[ァ-ヶー]",
-    note: "Furigana fields always require full-width katakana",
+    pattern: "[ァ-ヶー・]",
+    note: "Furigana fields always require full-width katakana. Nakaguro (・) is allowed for foreign-resident names like ジョン・スミス",
   },
   {
     field: "phone_number",
@@ -63,9 +63,11 @@ export function fullwidthAsciiToHalfwidth(str: string): string {
 
 /**
  * Check if string contains only full-width katakana (for furigana validation)
+ * Nakaguro (・ U+30FB) is allowed alongside spaces so foreign residents' katakana
+ * names (e.g. ジョン・スミス) pass validation.
  */
 export function isFullWidthKatakana(str: string): boolean {
-  return /^[ァ-ヶー\s]+$/.test(str);
+  return /^[ァ-ヶー・\s]+$/.test(str);
 }
 
 /**

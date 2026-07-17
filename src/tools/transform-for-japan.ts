@@ -170,12 +170,12 @@ export function transformForJapan(params: TransformParams): TransformResult {
   <fieldset>
     <legend>お名前</legend>
     <div ${cls("name-fields")}>
-      <label>姓 <input name="sei"${lastNameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
-      <label>名 <input name="mei"${firstNameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>姓 <input name="sei"${lastNameAttrs} pattern="[一-龥豈-﫿㐀-䶿ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>名 <input name="mei"${firstNameAttrs} pattern="[一-龥豈-﫿㐀-䶿ぁ-んァ-ヶー々〇]+" required /></label>
     </div>
     <div ${cls("furigana-fields")}>
-      <label>セイ <input name="sei_kana"${furiganaAttrs} pattern="[ァ-ヶー]+" required /></label>
-      <label>メイ <input name="mei_kana"${furiganaAttrs} pattern="[ァ-ヶー]+" required /></label>
+      <label>セイ <input name="sei_kana"${furiganaAttrs} pattern="[ァ-ヶー・　 ]+" required /></label>
+      <label>メイ <input name="mei_kana"${furiganaAttrs} pattern="[ァ-ヶー・　 ]+" required /></label>
     </div>
   </fieldset>`;
       transformed = transformed.slice(0, insertIdx) + nameBlock + transformed.slice(insertIdx);
@@ -201,12 +201,12 @@ export function transformForJapan(params: TransformParams): TransformResult {
       transformed = transformed.replace(singleNameInputMatch[0], `<fieldset>
     <legend>お名前</legend>
     <div ${cls("name-fields")}>
-      <label>姓 <input name="sei"${nameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
-      <label>名 <input name="mei"${nameAttrs} pattern="[一-龥ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>姓 <input name="sei"${nameAttrs} pattern="[一-龥豈-﫿㐀-䶿ぁ-んァ-ヶー々〇]+" required /></label>
+      <label>名 <input name="mei"${nameAttrs} pattern="[一-龥豈-﫿㐀-䶿ぁ-んァ-ヶー々〇]+" required /></label>
     </div>
     <div ${cls("furigana-fields")}>
-      <label>セイ <input name="sei_kana"${nameAttrs} pattern="[ァ-ヶー]+" required /></label>
-      <label>メイ <input name="mei_kana"${nameAttrs} pattern="[ァ-ヶー]+" required /></label>
+      <label>セイ <input name="sei_kana"${nameAttrs} pattern="[ァ-ヶー・　 ]+" required /></label>
+      <label>メイ <input name="mei_kana"${nameAttrs} pattern="[ァ-ヶー・　 ]+" required /></label>
     </div>
   </fieldset>`);
       changes.push({

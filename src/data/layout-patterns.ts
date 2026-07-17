@@ -110,7 +110,7 @@ export const LAYOUT_RULES: LayoutRule[] = [
     category: "density",
     rule: "Chirashi (flyer) tradition: pack content, minimize whitespace",
     details:
-      "Japanese web layout descends from chirashi (折込チラシ) -- printed advertising flyers stuffed into newspapers. These flyers cram prices, product images, sale badges, and text into every square centimeter. Web design inherited this density ethic. Supermarket sites, real estate listings, and event pages especially follow chirashi logic. Whitespace is seen as wasted opportunity, not elegance.",
+      "A popular theory holds that Japanese web layout descends from chirashi (折込チラシ) -- printed advertising flyers stuffed into newspapers that cram prices, product images, sale badges, and text into every square centimeter. Whatever the lineage, the density ethic is real in specific segments: supermarket sites, real estate listings, and event pages especially follow chirashi-style logic, where whitespace tends to be treated as wasted opportunity rather than elegance.",
     platform: "both",
   },
   {
@@ -136,7 +136,7 @@ export const LAYOUT_RULES: LayoutRule[] = [
     category: "structure",
     rule: "Long single-page scrollers for 30+ demographic",
     details:
-      "Japanese sites targeting users aged 30+ overwhelmingly use long single-page scroll layouts rather than multi-page navigation. The entire story -- from hero to features to testimonials to CTA -- lives on one page. This LP (landing page) format is the default for service sites, recruitment pages, and product launches. Pagination is reserved for catalogs and search results.",
+      "Japanese sites targeting users aged 30+ commonly use long single-page scroll layouts rather than multi-page navigation. The entire story -- from hero to features to testimonials to CTA -- lives on one page. This LP (landing page) format is the default for service sites, recruitment pages, and product launches. Pagination is reserved for catalogs and search results.",
     platform: "both",
   },
   {
@@ -189,7 +189,7 @@ export const LAYOUT_RULES: LayoutRule[] = [
     category: "responsive",
     rule: "Tablet layouts: designers do not deliver tablet designs, developers interpolate",
     details:
-      "In most Japanese web studios, designers only deliver PC and mobile mockups. Tablet (768px) is left to the developer to interpolate. The unspoken rule: use the PC layout but compress side margins, or use a 2-column version of the mobile layout. This is industry standard -- requesting tablet designs from a client or designer is unusual and may signal inexperience.",
+      "In most Japanese web studios, designers only deliver PC and mobile mockups. Tablet (768px) is left to the developer to interpolate. The unspoken rule: use the PC layout but compress side margins, or use a 2-column version of the mobile layout. This is common industry practice -- dedicated tablet mockups are unusual and typically only produced when the project specifically calls for them.",
     platform: "both",
   },
   {

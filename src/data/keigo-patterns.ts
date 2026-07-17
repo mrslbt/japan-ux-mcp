@@ -65,7 +65,7 @@ export const KEIGO_PATTERNS: KeigoPattern[] = [
       casual: "セッションが切れちゃった。もう一度ログインしてね",
       neutral: "セッションが切れました。再度ログインしてください。",
       formal: "セッションの有効期限が切れました。お手数ですが、再度ログインしてください。",
-      very_formal: "セッションの有効期限が切れました。誠に恐れ入りますが、再度ログインいただけますようお願い申し上げます。",
+      very_formal: "セッションの有効期限が切れました。誠に恐れ入りますが、再度ログインしていただけますようお願い申し上げます。",
     },
   },
   {
@@ -89,7 +89,7 @@ export const KEIGO_PATTERNS: KeigoPattern[] = [
       casual: "送信",
       neutral: "送信する",
       formal: "送信する",
-      very_formal: "ご送信",
+      very_formal: "送信する",
     },
   },
   {
@@ -123,7 +123,7 @@ export const KEIGO_PATTERNS: KeigoPattern[] = [
       casual: "キャンセル",
       neutral: "キャンセル",
       formal: "キャンセルする",
-      very_formal: "取り消す",
+      very_formal: "キャンセル",
     },
   },
   {
