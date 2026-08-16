@@ -82,6 +82,21 @@ function removeAssociatedLabel(markup: string, attrs: string): string {
   return next;
 }
 
+/**
+ * Remove a bare sibling <label>…</label> sitting immediately before `anchor`.
+ * Covers the common <label>Name</label><input name="name"> shape, where the
+ * label neither wraps the input nor carries for= — the two removal paths that
+ * already exist can't see it and it would survive as an orphan.
+ */
+function stripPrecedingLabel(html: string, anchor: string): string {
+  const idx = html.indexOf(anchor);
+  if (idx < 0) return html;
+  const before = html.slice(0, idx);
+  const m = before.match(/<label(?![^>]*\bfor=)[^>]*>(?:(?!<\/label>)[\s\S])*?<\/label>\s*$/i);
+  if (!m) return html;
+  return before.slice(0, before.length - m[0].length) + html.slice(idx);
+}
+
 export function transformForJapan(params: TransformParams): TransformResult {
   const { markup, context, format, preserve_styling } = params;
   const isJsx = format === "jsx" || format === "tsx";
@@ -97,24 +112,28 @@ export function transformForJapan(params: TransformParams): TransformResult {
   let transformed = markup;
   const changes: Change[] = [];
 
+  // Tempered [\s\S]: never cross a </label> boundary. With sibling markup
+  // (<label>Name</label><input …>) the naive lazy match spans from one label
+  // through a LATER element's </label>, deleting unrelated fields (v2.1.0 bug).
+  const INSIDE_LABEL = "(?:(?!<\\/label>)[\\s\\S])*?";
   const firstNameWrappedRegex = new RegExp(
-    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${FIRST_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    `<label[^>]*>${INSIDE_LABEL}<input[^>]*name=["']?${FIRST_NAME_NAME_PATTERN}["']?[^>]*\\/?>${INSIDE_LABEL}<\\/label>`,
     "gi"
   );
   const lastNameWrappedRegex = new RegExp(
-    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${LAST_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    `<label[^>]*>${INSIDE_LABEL}<input[^>]*name=["']?${LAST_NAME_NAME_PATTERN}["']?[^>]*\\/?>${INSIDE_LABEL}<\\/label>`,
     "gi"
   );
   const singleNameWrappedRegex = new RegExp(
-    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${SINGLE_NAME_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    `<label[^>]*>${INSIDE_LABEL}<input[^>]*name=["']?${SINGLE_NAME_NAME_PATTERN}["']?[^>]*\\/?>${INSIDE_LABEL}<\\/label>`,
     "gi"
   );
   const singlePhoneWrappedRegex = new RegExp(
-    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${PHONE_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    `<label[^>]*>${INSIDE_LABEL}<input[^>]*name=["']?${PHONE_NAME_PATTERN}["']?[^>]*\\/?>${INSIDE_LABEL}<\\/label>`,
     "gi"
   );
   const addressWrappedRegex = new RegExp(
-    `<label[^>]*>[\\s\\S]*?<input[^>]*name=["']?${ADDRESS_NAME_PATTERN}["']?[^>]*\\/?>[\\s\\S]*?<\\/label>`,
+    `<label[^>]*>${INSIDE_LABEL}<input[^>]*name=["']?${ADDRESS_NAME_PATTERN}["']?[^>]*\\/?>${INSIDE_LABEL}<\\/label>`,
     "gi"
   );
 
@@ -196,8 +215,10 @@ export function transformForJapan(params: TransformParams): TransformResult {
     const singleNameInputMatch = transformed.match(singleNameInputRegex);
     if (singleNameInputMatch) {
       const nameAttrs = extractStylingAttrs(singleNameInputMatch[1] || "", preserve_styling);
-      transformed = transformed.replace(singleNameWrappedRegex, "");
-      transformed = removeAssociatedLabel(transformed, singleNameInputMatch[1] || "");
+      // Replace the input FIRST (this is the insertion anchor), then clean up
+      // the label. v2.1.0 deleted the wrapped span first, which consumed the
+      // anchor and made this replace a silent no-op — the name field vanished.
+      transformed = stripPrecedingLabel(transformed, singleNameInputMatch[0]);
       transformed = transformed.replace(singleNameInputMatch[0], `<fieldset>
     <legend>お名前</legend>
     <div ${cls("name-fields")}>
@@ -209,6 +230,8 @@ export function transformForJapan(params: TransformParams): TransformResult {
       <label>メイ <input name="mei_kana"${nameAttrs} pattern="[ァ-ヶー・　 ]+" required /></label>
     </div>
   </fieldset>`);
+      transformed = transformed.replace(singleNameWrappedRegex, "");
+      transformed = removeAssociatedLabel(transformed, singleNameInputMatch[1] || "");
       changes.push({
         what: "Split single name field into 姓/名 + furigana",
         why: "Japanese names require separate family/given fields and katakana furigana for pronunciation",
@@ -220,21 +243,16 @@ export function transformForJapan(params: TransformParams): TransformResult {
   const singlePhoneInputMatch = transformed.match(singlePhoneInputRegex);
   if (singlePhoneInputMatch) {
     const phoneAttrs = extractStylingAttrs(singlePhoneInputMatch[1] || "", preserve_styling);
-    transformed = transformed.replace(singlePhoneWrappedRegex, "");
-    transformed = removeAssociatedLabel(transformed, singlePhoneInputMatch[1] || "");
+    transformed = stripPrecedingLabel(transformed, singlePhoneInputMatch[0]);
     transformed = transformed.replace(singlePhoneInputMatch[0], `<fieldset>
     <legend>電話番号</legend>
-    <div ${cls("phone-fields")}>
-      <input name="phone1" type="tel"${phoneAttrs} pattern="[0-9]{2,5}" ${maxLen(5)} placeholder="090" />
-      <span>-</span>
-      <input name="phone2" type="tel"${phoneAttrs} pattern="[0-9]{1,4}" ${maxLen(4)} placeholder="1234" />
-      <span>-</span>
-      <input name="phone3" type="tel"${phoneAttrs} pattern="[0-9]{4}" ${maxLen(4)} placeholder="5678" />
-    </div>
+    <input name="phone" type="tel"${phoneAttrs} autocomplete="tel-national" inputmode="numeric" pattern="0[0-9]{1,3}-?[0-9]{1,4}-?[0-9]{4}" ${maxLen(13)} placeholder="09012345678" />
   </fieldset>`);
+    transformed = transformed.replace(singlePhoneWrappedRegex, "");
+    transformed = removeAssociatedLabel(transformed, singlePhoneInputMatch[1] || "");
     changes.push({
-      what: "Split phone into 3 fields (XXX-XXXX-XXXX)",
-      why: "Japanese phone convention uses 3 separate input fields",
+      what: "Rebuilt phone input as a single tel field with Japanese validation",
+      why: "デジタル庁 design system recommends one phone field; full-width digits auto-noted for conversion",
     });
   }
 

@@ -278,16 +278,17 @@ server.registerTool(
     title: "Get Seasonal Context",
     description: "Get the current Japanese seasonal context for design decisions. Returns: current season with traditional colors, active events (正月, 花見, お盆, etc.), upcoming events, the current microseason (二十四節気), recommended design colors, and warnings (e.g., do not launch during Golden Week). Covers all 24 Japanese microseasons and 24+ major events.",
     inputSchema: withTitles({
-      month: z.number().min(1).max(12).describe("Month (1-12)"),
-      day: z.number().min(1).max(31).optional().describe("Day of month (defaults to 15)"),
+      month: z.number().min(1).max(12).optional().describe("Month (1-12). Defaults to the current month (server local time)."),
+      day: z.number().min(1).max(31).optional().describe("Day of month. Defaults to today when month is omitted, else 15."),
     }),
     annotations: READONLY,
   },
   async (params) => {
-    const result = getSeasonalContext({
-      month: params.month,
-      day: params.day,
-    });
+    // Agents ask "what season is it NOW" — don't make them know the date first.
+    const now = new Date();
+    const month = params.month ?? now.getMonth() + 1;
+    const day = params.day ?? (params.month == null ? now.getDate() : undefined);
+    const result = getSeasonalContext({ month, day });
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };

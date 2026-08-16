@@ -29,10 +29,10 @@ interface UiFinding {
 const SOURCES: Record<string, { basis: Basis; source: string }> = {
   wrapping_kinsoku: { basis: "spec", source: "W3C JLReq (Requirements for Japanese Text Layout) §3 line breaking; JIS X 4051 kinsoku shori — line-break: strict opts into the stricter rule set (small kana, prolonged sound mark)" },
   wrapping_word_break: { basis: "convention", source: "CSS word-break: keep-all is designed for Korean; on spaceless Japanese body text it risks overflow — documented web practice, not a JLReq clause" },
-  wrapping_break_all: { basis: "spec", source: "JIS X 4051 kinsoku shori; W3C JLReq line breaking — break-all permits prohibited characters (、。ー small kana) at line starts" },
+  wrapping_break_all: { basis: "convention", source: "CSS Text Level 3 §5.1 — word-break: break-all shreds embedded Latin words and URLs mid-word; kinsoku for punctuation is governed by line-break, not word-break. Use line-break: strict + overflow-wrap: break-word instead" },
   wrapping_overflow: { basis: "convention", source: "CSS overflow control; safety net alongside kinsoku" },
   wrapping_text_align: { basis: "convention", source: "JLReq describes justified setting as traditional; left-align is the dominant web convention — justify is acceptable for CJK" },
-  hierarchy_no_italics: { basis: "spec", source: "W3C JLReq — Japanese has no italic forms; emphasis via weight, kenten dots, or 「」" },
+  hierarchy_no_italics: { basis: "convention", source: "Japanese typographic tradition has no italic forms — W3C JLReq documents emphasis via kenten dots (圏点) and corner brackets 「」 instead; browsers can only fake a slant" },
   line_height_body: { basis: "convention", source: "Japanese web practice — 1.8–2.0 for kanji density (a convention, not a JLReq px value)" },
   sizing_kanji_minimum: { basis: "convention", source: "Japanese web accessibility practice — 14px kanji legibility floor" },
   sizing_body_minimum: { basis: "convention", source: "Japanese web practice — 16px body-text recommendation" },

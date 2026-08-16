@@ -100,6 +100,7 @@ export function checkJpTypography(params: CheckTypographyParams): CheckTypograph
         fix: "Confirm this size is used only for captions/fine print. Use 16px for body text (14px minimum).",
       });
       score -= 5;
+      hasSmallFont = true;
     } else if (size >= 14 && size < 16) {
       issues.push({
         rule_id: "sizing_body_minimum",
@@ -110,6 +111,8 @@ export function checkJpTypography(params: CheckTypographyParams): CheckTypograph
       score -= 5;
     }
   }
+  // Only claim the pass when nothing in the 12-13px caution band fired either —
+  // a warning and this pass line in the same report contradict each other.
   if (!hasSmallFont && fontSizeMatchesArr.length > 0) {
     passed.push("Font sizes meet kanji readability minimum");
   }
@@ -165,7 +168,7 @@ export function checkJpTypography(params: CheckTypographyParams): CheckTypograph
     issues.push({
       rule_id: "wrapping_break_all",
       severity: "error",
-      message: "word-break: break-all detected. This permits line breaks at any character, allowing prohibited characters (、。ー small kana) to start lines, which violates kinsoku shori.",
+      message: "word-break: break-all detected. This breaks embedded Latin words, URLs, and codes at any character mid-word. (Punctuation kinsoku is governed by line-break, not word-break.)",
       fix: "Remove word-break: break-all from Japanese text. Use overflow-wrap: break-word for long-string safety and line-break: strict for kinsoku.",
       css_suggestion: "word-break: normal; overflow-wrap: break-word; line-break: strict;",
     });

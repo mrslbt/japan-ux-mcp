@@ -1,6 +1,6 @@
 {
   "name": "japan-ux-mcp",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Japan Design — UI + UX correctness for AI coding agents. Enforces Japanese front-end (typography, colour, layout) and UX (forms, keigo, trust) conventions on real CSS/markup, with JLReq/JIS citations.",
   "mcpName": "io.github.mrslbt/japan-ux",
   "main": "dist/index.js",

@@ -154,3 +154,48 @@ test("seasonal context includes Tanabata in July active events", () => {
 
   assert.ok(result.active_events.some((event) => event.id === "tanabata"));
 });
+
+test("transform: sibling <label>Name</label><input name=name> keeps every field (v2.1.0 deleted them)", () => {
+  const r = transformForJapan({
+    markup: '<form><label>Name</label><input type="text" name="name" placeholder="John Smith"><label>Phone</label><input type="tel" name="phone"><button>Submit</button></form>',
+    context: "ecommerce",
+    format: "html",
+    preserve_styling: false,
+  });
+  const html = r.transformed_markup;
+  // the v2.1.0 bug: the wrapped-label regex crossed </label> boundaries,
+  // deleted the name input, and the 姓/名 fieldset never inserted
+  assert.ok(html.includes('name="sei"'), "姓 field must exist");
+  assert.ok(html.includes('name="mei"'), "名 field must exist");
+  assert.ok(html.includes("sei_kana"), "furigana must exist");
+  assert.ok(html.includes('name="phone"'), "phone field must exist");
+  assert.ok(html.includes("<button"), "button must survive");
+  assert.ok(!/<label>Name<\/label>/.test(html), "orphan Name label removed");
+  assert.ok(!/<label>Phone<\/label>/.test(html), "orphan Phone label removed");
+});
+
+test("transform: phone becomes a single field (デジタル庁), not a 3-field split", () => {
+  const r = transformForJapan({
+    markup: '<form><input type="tel" name="phone"></form>',
+    context: "ecommerce",
+    format: "html",
+    preserve_styling: false,
+  });
+  assert.ok(!r.transformed_markup.includes("phone1"), "no legacy 3-field split");
+  assert.ok(r.transformed_markup.includes('autocomplete="tel-national"'));
+});
+
+test("typography: a 12-13px size cannot both warn and claim the sizes-pass line", () => {
+  const r = checkJpTypography({ css: "body { font-size: 12px; font-family: 'Noto Sans JP', sans-serif; line-height: 1.8; }" });
+  const warned = r.issues.some((i) => i.rule_id === "sizing_kanji_minimum");
+  const passClaimed = r.passed.includes("Font sizes meet kanji readability minimum");
+  assert.ok(warned, "12px should warn");
+  assert.ok(!passClaimed, "pass line must not appear alongside the warning");
+});
+
+test("seasonal: month defaults are wired (handler requires month, index fills today)", () => {
+  // direct handler call still requires month — this guards the data path for Aug
+  const r = getSeasonalContext({ month: 8, day: 16 });
+  assert.equal(r.current_microseason.id, "risshuu");
+  assert.ok(r.active_events.some((e) => e.id === "obon"));
+});

@@ -43,6 +43,13 @@ export const PHONE_FORMATS: PhoneFormat[] = [
     description: "Toll-free numbers",
   },
   {
+    type: "toll_free_0800",
+    prefixes: ["0800"],
+    totalDigits: 11,
+    fields: [4, 3, 4],
+    description: "Toll-free numbers (newer 0800 range)",
+  },
+  {
     type: "navi_dial",
     prefixes: ["0570"],
     totalDigits: 10,

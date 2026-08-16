@@ -129,23 +129,13 @@ export function generateJpForm(params: GenerateFormParams): { markup: string; no
       case "phone": {
         lines.push(`${i}<fieldset>`);
         if (include_labels) lines.push(`${i}${i}<legend>${label("phone", language)}</legend>`);
-        lines.push(`${i}${i}<div ${cls("phone-fields")}>`);
         if (include_validation) {
-          lines.push(`${i}${i}${i}<input name="phone1" type="tel" pattern="[0-9]{2,5}" ${maxLen(5)} placeholder="090" />`);
-          lines.push(`${i}${i}${i}<span>-</span>`);
-          lines.push(`${i}${i}${i}<input name="phone2" type="tel" pattern="[0-9]{1,4}" ${maxLen(4)} placeholder="1234" />`);
-          lines.push(`${i}${i}${i}<span>-</span>`);
-          lines.push(`${i}${i}${i}<input name="phone3" type="tel" pattern="[0-9]{4}" ${maxLen(4)} placeholder="5678" />`);
+          lines.push(`${i}${i}<input name="phone" type="tel" autocomplete="tel-national" inputmode="numeric" pattern="0[0-9]{1,3}-?[0-9]{1,4}-?[0-9]{4}" ${maxLen(13)} placeholder="09012345678" />`);
         } else {
-          lines.push(`${i}${i}${i}<input name="phone1" type="tel" placeholder="090" />`);
-          lines.push(`${i}${i}${i}<span>-</span>`);
-          lines.push(`${i}${i}${i}<input name="phone2" type="tel" placeholder="1234" />`);
-          lines.push(`${i}${i}${i}<span>-</span>`);
-          lines.push(`${i}${i}${i}<input name="phone3" type="tel" placeholder="5678" />`);
+          lines.push(`${i}${i}<input name="phone" type="tel" autocomplete="tel-national" inputmode="numeric" placeholder="09012345678" />`);
         }
-        lines.push(`${i}${i}</div>`);
         lines.push(`${i}</fieldset>`);
-        notes.push("Phone uses 3-field format: area code (2-5 digits) - exchange (1-4) - subscriber (4).");
+        notes.push("Phone uses a single field (デジタル庁 design system recommendation). Accept hyphenated and unhyphenated input; auto-convert full-width digits. A 3-field split remains acceptable if the design system requires it.");
         break;
       }
 

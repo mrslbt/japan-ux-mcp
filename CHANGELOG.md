@@ -53,3 +53,37 @@ Accuracy audit release. Every rule and data claim in the package was fact-checke
 ## 2.0.1
 
 Previous release.
+## [2.1.1] — 2026-08-16
+
+Accuracy pass ahead of launch: every spec citation was re-verified against the
+cited documents, and the kinsoku claims were tested empirically in Blink.
+
+### Fixed
+
+- **transform_for_japan no longer deletes fields.** With sibling markup
+  (`<label>Name</label><input name="name">`) the wrapped-label regex crossed
+  `</label>` boundaries, consumed the input, and the 姓/名+furigana fieldset
+  silently never inserted. Regexes are now tempered (never cross a closing
+  label), insertion happens before cleanup, and bare sibling labels are
+  removed instead of orphaned. Regression tests cover the exact failing markup.
+- **break-all finding corrected and relabeled.** CSS Text Level 3 says
+  word-break: break-all does not affect punctuation kinsoku (that is
+  line-break's job), confirmed by in-browser testing. The finding now states
+  the real hazard (mid-word breaks in embedded Latin/URLs), cites CSS Text 3
+  §5.1, and is labeled convention rather than spec.
+- **No-italics finding relabeled convention.** True in practice, but JLReq
+  documents kenten and brackets without stating "no italic forms" — the old
+  citation overstated the source.
+- **Phone philosophy unified: single field everywhere.** validate_jp_form
+  already praised the single-field pattern (デジタル庁 design system);
+  transform_for_japan and generate_jp_form now emit it too, with
+  autocomplete="tel-national" and inputmode="numeric", instead of imposing the
+  legacy 3-field split the validator called optional.
+- check_jp_typography no longer lists "font sizes meet kanji minimum" as
+  passed while warning about a 12-13px size in the same report.
+
+### Added
+
+- 0800 toll-free range in phone formats (alongside 0120).
+- get_seasonal_context now defaults to today when month is omitted.
+
